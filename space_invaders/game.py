@@ -1,6 +1,7 @@
 import pygame
+from math import sqrt
 from pygame.locals import *
-from space_invaders.Menu import Menu
+from space_invaders.menu import Menu
 from space_invaders.player import Player
 from space_invaders.enemy import Enemy
 from space_invaders.bullet import Bullet
@@ -8,10 +9,12 @@ import random
 
 
 class Game:
-    def __init__(self, screen, rows=5, cols=8, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.0, ai=False):
+    def __init__(self, screen, rows=5, cols=11, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=False,
+                 danger_threshold=30):
         self.screen = screen
         self.rows = rows
         self.cols = cols
+        self.col_positions, self.row_positions = self.init_cols_rows()
         self.menu = Menu(screen, 0, 0, 200, 600)
         self.bg_color = (0, 0, 0)
         self.clock = pygame.time.Clock()
@@ -21,7 +24,7 @@ class Game:
         self.bullet_image = "../assets/images/bullet.png"
         self.player = Player(400, 500, self.player_image)
         self.enemies = pygame.sprite.Group()
-        self.enemy_speed_x = 20
+        self.enemy_speed_x = 10
         self.enemy_speed_y = 0
         self.enemies_attack = enemies_attack
         self.enemy_attackspeed = enemy_attackspeed
@@ -33,40 +36,76 @@ class Game:
         self.lives_font = pygame.font.Font("../assets/fonts/game_font.otf", 24)
         self.game_over = False
         self.ai = ai
+        self.danger_threshold = danger_threshold
         self.counter = 0
 
+    def init_cols_rows(self):
+        spacing_x = 60
+        spacing_y = 50
+        beginning_offset_x = 80
+        beginning_offset_y = 80
+        col_positions = {}
+        row_positions = {}
+        for col in range(self.cols):
+            col_positions[col] = beginning_offset_x + col * spacing_x
+        for row in range(self.rows):
+            row_positions[row] = beginning_offset_y + row * spacing_y
+        return col_positions, row_positions
+
+    def enemy_bullet_positions(self, player, bullets, distance_threshold):
+        player_x, player_y = player.rect.center
+
+        left = False
+        right = False
+
+        for bullet in bullets:
+            if not bullet.player_bullet:  # Check if the bullet is an enemy bullet
+                bullet_x, bullet_y = bullet.rect.center
+                distance = sqrt((bullet_x - player_x) ** 2 + (bullet_y - player_y) ** 2)
+
+                if distance <= distance_threshold:
+                    if bullet_x < player_x:
+                        left = True
+                    elif bullet_x > player_x:
+                        right = True
+
+        return left, right
+
     def get_state(self):
-        state = [self.player.rect.x, self.player.rect.y, self.player.lives]
+        player_x = self.player.rect.x
+        player_y = self.player.rect.y
+        state = []
         for enemies in self.enemies_matrix:
             for enemy in enemies:
-                if enemy.alive:
-                    state.append(enemy.rect.x)
-                    state.append(enemy.rect.y)
+                if enemy is not None and enemy.alive:
+                    state.append(enemy.rect.x - player_x)
+                    state.append(enemy.rect.y - player_y)
                 else:
                     state.append(-1)
                     state.append(-1)
+        danger_left, danger_right = self.enemy_bullet_positions(self.player, self.bullets, self.danger_threshold)
+        state.append(danger_left)
+        state.append(danger_right)
         return state
 
     def reset(self):
         self.enemies_matrix = []
         self.enemies.empty()
         self.spawn_enemies(rows=self.rows, cols=self.cols)
-        self.game_over = False
+        # self.game_over = False
         self.bullets.empty()
         self.player.kill()
         self.player = Player(400, 500, self.player_image)
         self.score = 0
 
     def spawn_enemies(self, rows, cols):
-        spacing_x = 80
-        spacing_y = 70
-
         for row in range(rows):
             enemy_row = []
             for col in range(cols):
-                x = 100 + col * spacing_x
-                y = 50 + row * spacing_y
-                enemy = Enemy(x, y, self.enemy_image)
+                x = self.col_positions[col]
+                y = self.row_positions[row]
+                enemy = Enemy(x, y, self.enemy_image, col=col, row=row, col_pos=self.col_positions,
+                              row_pos=self.row_positions)
                 enemy_row.append(enemy)
                 self.enemies.add(enemy)
             self.enemies_matrix.append(enemy_row)
@@ -87,16 +126,12 @@ class Game:
         # 4 = rightShoot
         if self.ai is True:
             if action == 0:
-                bullet = Bullet(self.player.rect.x + self.player.rect.width / 2 - 2, self.player.rect.y,
-                                self.bullet_image, -5, player_bullet=True)
-                self.bullets.add(bullet)
+                self.shoot()
             elif action == 1 or action == 2:
                 self.player.update(action)
             else:
                 self.player.update(action)
-                bullet = Bullet(self.player.rect.x + self.player.rect.width / 2 - 2, self.player.rect.y,
-                                self.bullet_image, -5, player_bullet=True)
-                self.bullets.add(bullet)
+                self.shoot()
         else:
             if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
                 self.player.update(keys=keys)
@@ -105,18 +140,43 @@ class Game:
                     pygame.quit()
                     self.game_over = True
                 if keys[pygame.K_SPACE]:
-                    bullet = Bullet(self.player.rect.x + self.player.rect.width / 2 - 2, self.player.rect.y,
-                                    self.bullet_image, -5, player_bullet=True)
-                    self.bullets.add(bullet)
+                    self.shoot()
+
+    def shoot(self):
+        does_player_bullet_exist = False
+        for bullet in self.bullets:
+            if bullet.player_bullet:
+                does_player_bullet_exist = True
+        if not does_player_bullet_exist:
+            bullet = Bullet(self.player.rect.x + self.player.rect.width / 2 - 2, self.player.rect.y,
+                            self.bullet_image, -5, player_bullet=True)
+            self.bullets.add(bullet)
 
     def remove_enemy(self, enemy):
         enemy.kill()
         self.enemies.remove(enemy)
+
         for enemy_list in self.enemies_matrix:
             if enemy in enemy_list:
-                enemy_list.remove(enemy)
-            if len(enemy_list) == 0:
-                self.enemies_matrix.remove(enemy_list)
+                index = enemy_list.index(enemy)
+                enemy_list[index] = None
+
+    def any_enemies_alive(self):
+        any_alive = False
+        for enemy_list in self.enemies_matrix:
+            for enemy in enemy_list:
+                if enemy is not None:
+                    if enemy.alive():
+                        any_alive = True
+        return any_alive
+
+        # enemy.kill()
+        # self.enemies.remove(enemy)
+        # for enemy_list in self.enemies_matrix:
+        #     if enemy in enemy_list:
+        #         enemy_list.remove(enemy)
+        #     if len(enemy_list) == 0:
+        #         self.enemies_matrix.remove(enemy_list)
 
     def update(self, action=None):
         self.counter += 1
@@ -128,6 +188,13 @@ class Game:
 
         old_score = self.score
         # Enemy movement control
+        # if self.counter % 30 == 0:
+        #     for enemy in self.enemies:
+        #         enemy.move()
+        #         if enemy.rect.bottom > self.screen.get_height():
+        #             self.player.lives -= 1
+        #             self.remove_enemy(enemy)
+
         for enemy in self.enemies:
             if enemy.rect.x < 10 and self.enemy_speed_x < 0 or enemy.rect.x > 790 - enemy.rect.width and self.enemy_speed_x > 0:
                 self.enemy_speed_x = -self.enemy_speed_x
@@ -138,7 +205,7 @@ class Game:
                 self.remove_enemy(enemy)
         if self.player.lives <= 0:
             self.game_over = True
-        if self.counter % 10 == 0:
+        if self.counter % 30 == 0:
             self.enemies.update(self.enemy_speed_x, self.enemy_speed_y)
             self.enemy_speed_y = 0
 
@@ -160,26 +227,25 @@ class Game:
             else:
                 if pygame.sprite.collide_rect(bullet, self.player):
                     bullet.kill()
+                    self.score -= 500
                     self.player.decrease_lives()
                     if self.player.lives <= 0:
                         self.player.kill()
                         self.game_over = True
 
-        if pygame.sprite.spritecollideany(self.player, self.enemies):
+        if pygame.sprite.spritecollideany(self.player, self.enemies) or not self.any_enemies_alive():
             self.game_over = True
-        if self.game_over:
-            self.reset()
-        if len(self.enemies_matrix) == 0:
+        if self.game_over and self.ai == False:
             self.reset()
 
         return tuple(self.get_state()), self.score - old_score
 
     def enemy_fire(self):
-        for i in range(self.cols):
+        for i in range(len(self.enemies_matrix[0])):
             if random.random() < self.enemy_attackspeed:
-                for j in range(self.rows - 1, -1, -1):
+                for j in range(len(self.enemies_matrix) - 1, -1, -1):
                     enemy = self.enemies_matrix[j][i]
-                    if enemy.alive():
+                    if enemy is not None and enemy.alive():
                         bullet = Bullet(enemy.rect.x + enemy.rect.width // 2, enemy.rect.y + enemy.rect.height,
                                         self.bullet_image, 5, player_bullet=False)
                         self.bullets.add(bullet)

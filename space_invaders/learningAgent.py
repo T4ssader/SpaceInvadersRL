@@ -1,7 +1,8 @@
 import numpy as np
 import time
 import random
-from space_invaders.Menu import Menu
+from space_invaders.menu import Menu
+
 
 class QLearningAgent:
     def __init__(self, actions, epsilon=0.3, gamma=0.99, alpha=0.5):
@@ -71,26 +72,31 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Space Invaders")
 
-    game = Game(screen, rows=5, cols=8, game_speed=0.5, enemies_attack=False, enemy_attackspeed=0.01, ai=True)
-    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.3, gamma=0.99, alpha=0.5)
+    game = Game(screen, rows=5, cols=11, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.001, ai=True)
+    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.3, gamma=0.99, alpha=0.7)
     # game.run()
+    game.menu.set_option("Epsilon", agent.epsilon)
+    game.menu.set_option("Alpha", agent.alpha)
+    game.menu.set_option("Gamma", agent.gamma)
     for i in range(1000):
         game.reset()
+        game.game_over = False
         agent.reset()
         state = game.get_state()
         action = agent.choose_action(state)
         score = 0
         while not game.game_over:
+            # print((agent.epsilon, agent.alpha, agent.gamma))
             next_state, reward = game.update(action)
             score += reward
             next_action = agent.choose_action(next_state)
-            time.sleep(0.01)
+            #time.sleep(0.001)
             agent.update(reward, state, action)
             game.draw()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     exit()
-                game.menu.handle_input(event)
+                game.menu.handle_input(event, agent)
             state = next_state
             action = next_action
             if game.game_over:

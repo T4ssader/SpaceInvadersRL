@@ -7,7 +7,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.speed = 5
+        self.speed = 10
         self.lives = 3
 
     def decrease_lives(self):
