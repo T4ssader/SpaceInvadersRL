@@ -9,7 +9,7 @@ import random
 
 
 class Game:
-    def __init__(self, screen, rows=5, cols=11, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=False,
+    def __init__(self, screen, rows=2, cols=3, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=False,
                  danger_threshold=30):
         self.screen = screen
         self.rows = rows
@@ -40,8 +40,8 @@ class Game:
         self.counter = 0
 
     def init_cols_rows(self):
-        spacing_x = 60
-        spacing_y = 50
+        spacing_x = 120
+        spacing_y = 100
         beginning_offset_x = 80
         beginning_offset_y = 80
         col_positions = {}

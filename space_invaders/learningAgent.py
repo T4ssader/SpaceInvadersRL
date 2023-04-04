@@ -2,7 +2,20 @@ import numpy as np
 import time
 import random
 from space_invaders.menu import Menu
+import matplotlib.pyplot as plt
+from IPython import display
 
+import matplotlib.rcsetup as rcsetup
+
+
+# Create an empty figure and axis
+plt.ion()
+fig, ax = plt.subplots()
+ax.set_xlabel('Episode')
+ax.set_ylabel('Score')
+ax.set_xlim(0, 1000)
+ax.set_ylim(0, 500)
+mean_scores = []
 
 class QLearningAgent:
     def __init__(self, actions, epsilon=0.3, gamma=0.99, alpha=0.5):
@@ -13,6 +26,26 @@ class QLearningAgent:
         self.alpha = alpha  # Lernrate
         self.prev_state = None  # vorheriger Zustand des Agenten
         self.prev_action = None  # vorherige Aktion des Agenten
+
+    def plot(self, scores):
+        display.clear_output(wait=True)
+        #display.display(plt.gcf())
+        plt.clf()
+        plt.title('Training...')
+        plt.xlabel('Number of Games')
+        plt.ylabel('Score')
+        plt.plot(scores)
+        sum_score = 0
+        for score in scores:
+            sum_score += score
+        mean_scores.append(sum_score / len(scores))
+
+        plt.plot(mean_scores)
+        plt.text(len(scores) - 1, scores[-1], str(scores[-1]))
+        plt.text(len(mean_scores) - 1, mean_scores[-1], str(mean_scores[-1]))
+
+        plt.show(block=False)
+        plt.pause(.001)
 
     def get_q_value(self, state, action):
         state = tuple(state)  # Konvertiere Zustand in ein Tuple
@@ -46,6 +79,7 @@ class QLearningAgent:
             else:
                 i = q_values.index(max_q_value)
             action = self.actions[i]
+
         return action
 
     # Funktion zum Zurücksetzen des Agenten
@@ -72,13 +106,14 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Space Invaders")
 
-    game = Game(screen, rows=5, cols=11, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.001, ai=True)
+    scores = []
+
+    game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
     agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.3, gamma=0.99, alpha=0.7)
-    # game.run()
     game.menu.set_option("Epsilon", agent.epsilon)
     game.menu.set_option("Alpha", agent.alpha)
     game.menu.set_option("Gamma", agent.gamma)
-    for i in range(1000):
+    for i in range(10000):
         game.reset()
         game.game_over = False
         agent.reset()
@@ -86,13 +121,12 @@ if __name__ == "__main__":
         action = agent.choose_action(state)
         score = 0
         while not game.game_over:
-            # print((agent.epsilon, agent.alpha, agent.gamma))
             next_state, reward = game.update(action)
             score += reward
             next_action = agent.choose_action(next_state)
             #time.sleep(0.001)
             agent.update(reward, state, action)
-            game.draw()
+            #game.draw()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     exit()
@@ -100,8 +134,11 @@ if __name__ == "__main__":
             state = next_state
             action = next_action
             if game.game_over:
+                scores.append(score)
+                agent.plot(scores)
                 print(f"Episode {i}: score={score}")
         if i % 100 == 0:
             agent.set_epsilon(agent.epsilon * 0.95)
 
+    #plt.show()
     pygame.quit()
