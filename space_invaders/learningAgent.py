@@ -1,12 +1,8 @@
-import numpy as np
-import time
 import random
-from space_invaders.menu import Menu
 import matplotlib.pyplot as plt
 from IPython import display
 
-import matplotlib.rcsetup as rcsetup
-
+from space_invaders.GUI import QLearningGUI
 
 # Create an empty figure and axis
 plt.ion()
@@ -18,7 +14,7 @@ ax.set_ylim(0, 500)
 mean_scores = []
 
 class QLearningAgent:
-    def __init__(self, actions, epsilon=0.3, gamma=0.99, alpha=0.5):
+    def __init__(self, actions, epsilon=0.3, gamma=0.99, alpha=0.01):
         self.q_table = {}  # Q-Tabelle zur Speicherung der Q-Werte
         self.actions = actions  # mögliche Aktionen des Agenten
         self.epsilon = epsilon  # Epsilon für die Epsilon-greedy Strategie
@@ -109,10 +105,14 @@ if __name__ == "__main__":
     scores = []
 
     game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
-    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.3, gamma=0.99, alpha=0.7)
-    game.menu.set_option("Epsilon", agent.epsilon)
-    game.menu.set_option("Alpha", agent.alpha)
-    game.menu.set_option("Gamma", agent.gamma)
+    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.15, gamma=1, alpha=0.1)
+    gui = QLearningGUI(game, agent)
+
+    # Aktualisieren Sie die Agentenparameter basierend auf den GUI-Werten
+    agent.set_epsilon(gui.epsilon)
+    agent.set_gamma(gui.gamma)
+    agent.set_alpha(gui.alpha)
+
     for i in range(10000):
         game.reset()
         game.game_over = False
@@ -120,25 +120,30 @@ if __name__ == "__main__":
         state = game.get_state()
         action = agent.choose_action(state)
         score = 0
+        # print the three variables
+        print("Episode: ", i, "Epsilon: ", agent.epsilon, "Alpha: ", agent.alpha, "Gamma: ", agent.gamma)
         while not game.game_over:
-            next_state, reward = game.update(action)
-            score += reward
-            next_action = agent.choose_action(next_state)
-            #time.sleep(0.001)
-            agent.update(reward, state, action)
-            #game.draw()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    exit()
-                game.menu.handle_input(event, agent)
-            state = next_state
-            action = next_action
-            if game.game_over:
-                scores.append(score)
-                agent.plot(scores)
-                print(f"Episode {i}: score={score}")
-        if i % 100 == 0:
-            agent.set_epsilon(agent.epsilon * 0.95)
+            if gui.steps_to_execute > 0:
+                for _ in range(gui.steps_to_execute):
+                    if game.game_over:
+                        break
+                    next_state, reward = game.update(action)
+                    score += reward
+                    next_action = agent.choose_action(next_state)
+                    agent.update(reward, state, action)
+                    game.draw()
+                    gui.root.update()
+                    state = next_state
+                    action = next_action
+                gui.steps_to_execute = 0
+                if game.game_over:
+                    scores.append(score)
+                    print(f"Episode {i}: score={score}")
+            else:
+                gui.root.update()
 
-    #plt.show()
+        if i % 100 == 0:
+            gui.set_epsilon(agent.epsilon * 0.95)
+
+    # plt.show()
     pygame.quit()

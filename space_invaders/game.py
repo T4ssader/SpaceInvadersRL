@@ -1,7 +1,6 @@
 import pygame
 from math import sqrt
 from pygame.locals import *
-from space_invaders.menu import Menu
 from space_invaders.player import Player
 from space_invaders.enemy import Enemy
 from space_invaders.bullet import Bullet
@@ -15,7 +14,6 @@ class Game:
         self.rows = rows
         self.cols = cols
         self.col_positions, self.row_positions = self.init_cols_rows()
-        self.menu = Menu(screen, 0, 0, 200, 600)
         self.bg_color = (0, 0, 0)
         self.clock = pygame.time.Clock()
         self.FPS = game_speed * 60
@@ -114,7 +112,6 @@ class Game:
         while not self.game_over:
             self.update()
             self.draw()
-            self.menu.draw()
             self.clock.tick(self.FPS)
 
     def handle_input(self, keys=None, action=None):
@@ -253,13 +250,12 @@ class Game:
 
     def draw(self):
         self.screen.fill(self.bg_color)
-        self.menu.draw()
         # Draw the score
         score_text = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
-        self.screen.blit(score_text, (10, 500))
+        self.screen.blit(score_text, (10, 0))
 
         lives_text = self.lives_font.render(f"Lives: {self.player.lives}", True, (255, 255, 255))
-        self.screen.blit(lives_text, (10, 540))
+        self.screen.blit(lives_text, (10, 40))
 
         self.screen.blit(self.player.image, self.player.rect)
         self.enemies.draw(self.screen)
