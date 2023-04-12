@@ -47,6 +47,9 @@ class QLearningAgent:
         state = tuple(state)  # Konvertiere Zustand in ein Tuple
         if state not in self.q_table:  # Wenn der Zustand noch nicht in der Q-Tabelle ist, füge ihn hinzu
             self.q_table[state] = {a: 0.0 for a in self.actions}
+        if action not in self.q_table[
+            state]:  # Wenn die Aktion noch nicht in der Q-Tabelle für diesen Zustand ist, füge sie hinzu
+            self.q_table[state][action] = 0.0
         return self.q_table[state][action]
 
     def update(self, reward, state, action):
@@ -93,6 +96,23 @@ class QLearningAgent:
     def set_gamma(self, gamma):
         self.gamma = gamma
 
+    # Ich brauch eine Funktion namens updateActions, die die möglichen Aktionen des Agenten ändert
+    # Es soll geschaut werden ob auf dem Spielfeld ein bullet vom spieler ist, wenn ja, dann
+    # sollen die actionen 0, 3, 4 nicht mehr möglich sein und wenn nicht, dann sollen sie wieder möglich sein
+    def updateActions(self, game):
+        does_player_bullet_exist = False
+        for bullet in game.bullets:
+            if bullet.player_bullet:
+                does_player_bullet_exist = True
+                self.actions = [1, 2]
+                break
+        if not does_player_bullet_exist:
+            self.actions = [0, 1, 2, 3, 4]
+
+
+    def setActions(self, actions):
+        self.actions = actions
+
 
 import pygame
 from space_invaders.game import Game
@@ -119,31 +139,39 @@ if __name__ == "__main__":
         agent.reset()
         state = game.get_state()
         action = agent.choose_action(state)
+
         score = 0
         # print the three variables
-        print("Episode: ", i, "Epsilon: ", agent.epsilon, "Alpha: ", agent.alpha, "Gamma: ", agent.gamma)
+        #print("Episode: ", i, "Epsilon: ", agent.epsilon, "Alpha: ", agent.alpha, "Gamma: ", agent.gamma)
         while not game.game_over:
             if gui.steps_to_execute > 0:
                 for _ in range(gui.steps_to_execute):
                     if game.game_over:
                         break
+                    agent.updateActions(game)
                     next_state, reward = game.update(action)
                     score += reward
                     next_action = agent.choose_action(next_state)
+                    # actions = 0 = shoot, 1 = left, 2 = right, 3 = leftShoot, 4 = rightShoot
+                    # print action and the name of the action
+                    #print(action)
                     agent.update(reward, state, action)
-                    game.draw()
+                    #game.draw()
                     gui.root.update()
                     state = next_state
                     action = next_action
-                gui.steps_to_execute = 0
+                    #print("actions: ", agent.actions)
+                #gui.steps_to_execute = 0
                 if game.game_over:
                     scores.append(score)
                     print(f"Episode {i}: score={score}")
             else:
                 gui.root.update()
 
+        agent.plot(scores)
+
         if i % 100 == 0:
             gui.set_epsilon(agent.epsilon * 0.95)
 
-    # plt.show()
+    plt.show()
     pygame.quit()
