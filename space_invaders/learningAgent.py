@@ -1,7 +1,8 @@
 import random
 import matplotlib.pyplot as plt
 from IPython import display
-
+import pygame
+from space_invaders.game import Game
 from space_invaders.GUI import QLearningGUI
 
 # Create an empty figure and axis
@@ -107,64 +108,67 @@ class QLearningAgent:
         self.actions = actions
 
 
-import pygame
-from space_invaders.game import Game
-
-if __name__ == "__main__":
+def main():
     pygame.init()
     screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Space Invaders")
 
-    scores = []
-
     game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
     agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.15, gamma=1, alpha=0.1)
-    #gui = QLearningGUI(game, agent)
 
-    # Aktualisieren Sie die Agentenparameter basierend auf den GUI-Werten
-    #agent.set_epsilon(gui.epsilon)
-    #agent.set_gamma(gui.gamma)
-    #agent.set_alpha(gui.alpha)
+    use_gui = True
+    simulation_mode = True  # Hinzufügen der simulation_mode Variable
 
+    if use_gui and not simulation_mode:
+        gui = QLearningGUI(game, agent)
+        agent.set_epsilon(gui.epsilon)
+        agent.set_gamma(gui.gamma)
+        agent.set_alpha(gui.alpha)
+
+    scores = []
     for i in range(10000):
         game.reset()
         game.game_over = False
         agent.reset()
         state = game.get_state()
         action = agent.choose_action(state)
-
         score = 0
-        # print the three variables
-        #print("Episode: ", i, "Epsilon: ", agent.epsilon, "Alpha: ", agent.alpha, "Gamma: ", agent.gamma)
+
         while not game.game_over:
-            #if gui.steps_to_execute > 0:
-               # for _ in range(gui.steps_to_execute):
+            steps_to_execute = gui.steps_to_execute if use_gui and not simulation_mode else 1
+            if steps_to_execute > 0:
+                for _ in range(steps_to_execute):
                     if game.game_over:
                         break
                     agent.updateActions(game)
                     next_state, reward = game.update(action)
                     score += reward
                     next_action = agent.choose_action(next_state)
-                    # actions = 0 = shoot, 1 = left, 2 = right, 3 = leftShoot, 4 = rightShoot
-                    # print action and the name of the action
-                    #print(action)
                     agent.update(reward, state, action)
-                    game.draw(agent=agent)
-                   # gui.root.update()
+
+                    # Zeichnen und GUI-Aktualisierung nur, wenn simulation_mode deaktiviert ist
+                    if not simulation_mode:
+                        game.draw(agent=agent)
+                        if use_gui:
+                            gui.root.update()
+
                     state = next_state
                     action = next_action
-                    #print("actions: ", agent.actions)
-                #gui.steps_to_execute = 0
                     if game.game_over:
-                     scores.append(score)
-                     print(f"Episode {i}: score={score}")
-            #else:
-               # gui.root.update()
-
+                        scores.append(score)
+                        if not simulation_mode:
+                            print(f"Episode {i}: score={score}")
+                if use_gui and not simulation_mode:
+                    gui.steps_to_execute = 0
+            else:
+                if use_gui and not simulation_mode:
+                    gui.root.update()
         agent.plot(scores)
-
-       # if i % 100 == 0:
-           # gui.set_epsilon(agent.epsilon * 0.95)
-
     plt.show()
     pygame.quit()
+
+
+if __name__ == "__main__":
+    main()
+
+
