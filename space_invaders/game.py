@@ -248,7 +248,8 @@ class Game:
                         self.bullets.add(bullet)
                         break
 
-    def draw(self):
+    def draw(self, agent=None):
+
         self.screen.fill(self.bg_color)
         # Draw the score
         score_text = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
@@ -260,4 +261,29 @@ class Game:
         self.screen.blit(self.player.image, self.player.rect)
         self.enemies.draw(self.screen)
         self.bullets.draw(self.screen)
+        if agent is not None:
+            best_action = agent.choose_action(self.get_state())
+            self.draw_best_action_arrow(best_action)
         pygame.display.flip()
+
+    def draw_best_action_arrow(self, best_action):
+        arrow_size = 20
+        arrow_color = (255, 0, 0)
+
+        if best_action == 1:  # Links
+            pygame.draw.line(self.screen, arrow_color,
+                             (self.player.rect.left, self.player.rect.centery),
+                             (self.player.rect.left - arrow_size, self.player.rect.centery), 3)
+        elif best_action == 2:  # Rechts
+            pygame.draw.line(self.screen, arrow_color,
+                             (self.player.rect.right, self.player.rect.centery),
+                             (self.player.rect.right + arrow_size, self.player.rect.centery), 3)
+        elif best_action == 3:  # Links schießen
+            pygame.draw.line(self.screen, arrow_color,
+                             (self.player.rect.left, self.player.rect.centery),
+                             (self.player.rect.left - int(arrow_size * 1.5), self.player.rect.centery - arrow_size), 3)
+        elif best_action == 4:  # Rechts schießen
+            pygame.draw.line(self.screen, arrow_color,
+                             (self.player.rect.right, self.player.rect.centery),
+                             (self.player.rect.right + int(arrow_size * 1.5), self.player.rect.centery - arrow_size), 3)
+

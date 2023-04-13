@@ -109,7 +109,6 @@ class QLearningAgent:
         if not does_player_bullet_exist:
             self.actions = [0, 1, 2, 3, 4]
 
-
     def setActions(self, actions):
         self.actions = actions
 
@@ -156,12 +155,12 @@ if __name__ == "__main__":
                     # print action and the name of the action
                     #print(action)
                     agent.update(reward, state, action)
-                    #game.draw()
+                    game.draw(agent=agent)
                     gui.root.update()
                     state = next_state
                     action = next_action
                     #print("actions: ", agent.actions)
-                #gui.steps_to_execute = 0
+                gui.steps_to_execute = 0
                 if game.game_over:
                     scores.append(score)
                     print(f"Episode {i}: score={score}")
