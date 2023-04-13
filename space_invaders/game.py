@@ -139,11 +139,15 @@ class Game:
                 if keys[pygame.K_SPACE]:
                     self.shoot()
 
-    def shoot(self):
+    def is_allowed_to_shoot(self):
         does_player_bullet_exist = False
         for bullet in self.bullets:
             if bullet.player_bullet:
                 does_player_bullet_exist = True
+        return does_player_bullet_exist
+
+    def shoot(self):
+        does_player_bullet_exist = self.is_allowed_to_shoot()
         if not does_player_bullet_exist:
             bullet = Bullet(self.player.rect.x + self.player.rect.width / 2 - 2, self.player.rect.y,
                             self.bullet_image, -5, player_bullet=True)

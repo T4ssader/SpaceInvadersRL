@@ -96,17 +96,11 @@ class QLearningAgent:
     def set_gamma(self, gamma):
         self.gamma = gamma
 
-    # Ich brauch eine Funktion namens updateActions, die die möglichen Aktionen des Agenten ändert
-    # Es soll geschaut werden ob auf dem Spielfeld ein bullet vom spieler ist, wenn ja, dann
-    # sollen die actionen 0, 3, 4 nicht mehr möglich sein und wenn nicht, dann sollen sie wieder möglich sein
     def updateActions(self, game):
-        does_player_bullet_exist = False
-        for bullet in game.bullets:
-            if bullet.player_bullet:
-                does_player_bullet_exist = True
-                self.actions = [1, 2]
-                break
-        if not does_player_bullet_exist:
+        does_player_bullet_exist = game.is_allowed_to_shoot()
+        if does_player_bullet_exist:
+            self.actions = [1, 2]
+        else:
             self.actions = [0, 1, 2, 3, 4]
 
     def setActions(self, actions):
@@ -125,12 +119,12 @@ if __name__ == "__main__":
 
     game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
     agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.15, gamma=1, alpha=0.1)
-    gui = QLearningGUI(game, agent)
+    #gui = QLearningGUI(game, agent)
 
     # Aktualisieren Sie die Agentenparameter basierend auf den GUI-Werten
-    agent.set_epsilon(gui.epsilon)
-    agent.set_gamma(gui.gamma)
-    agent.set_alpha(gui.alpha)
+    #agent.set_epsilon(gui.epsilon)
+    #agent.set_gamma(gui.gamma)
+    #agent.set_alpha(gui.alpha)
 
     for i in range(10000):
         game.reset()
@@ -143,8 +137,8 @@ if __name__ == "__main__":
         # print the three variables
         #print("Episode: ", i, "Epsilon: ", agent.epsilon, "Alpha: ", agent.alpha, "Gamma: ", agent.gamma)
         while not game.game_over:
-            if gui.steps_to_execute > 0:
-                for _ in range(gui.steps_to_execute):
+            #if gui.steps_to_execute > 0:
+               # for _ in range(gui.steps_to_execute):
                     if game.game_over:
                         break
                     agent.updateActions(game)
@@ -156,21 +150,21 @@ if __name__ == "__main__":
                     #print(action)
                     agent.update(reward, state, action)
                     game.draw(agent=agent)
-                    gui.root.update()
+                   # gui.root.update()
                     state = next_state
                     action = next_action
                     #print("actions: ", agent.actions)
-                gui.steps_to_execute = 0
-                if game.game_over:
-                    scores.append(score)
-                    print(f"Episode {i}: score={score}")
-            else:
-                gui.root.update()
+                #gui.steps_to_execute = 0
+                    if game.game_over:
+                     scores.append(score)
+                     print(f"Episode {i}: score={score}")
+            #else:
+               # gui.root.update()
 
         agent.plot(scores)
 
-        if i % 100 == 0:
-            gui.set_epsilon(agent.epsilon * 0.95)
+       # if i % 100 == 0:
+           # gui.set_epsilon(agent.epsilon * 0.95)
 
     plt.show()
     pygame.quit()
