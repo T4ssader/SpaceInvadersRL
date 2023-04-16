@@ -4,6 +4,8 @@ from IPython import display
 import pygame
 from space_invaders.game import Game
 from space_invaders.GUI import QLearningGUI
+import pickle
+
 
 # Create an empty figure and axis
 plt.ion()
@@ -107,16 +109,26 @@ class QLearningAgent:
     def setActions(self, actions):
         self.actions = actions
 
+    def save_qtable(self, filename):
+        with open(filename, 'wb') as f:
+            pickle.dump(self.q_table, f)
+
+    def load_qtable(self, filename):
+        with open(filename, 'rb') as f:
+            q_table = pickle.load(f)
+        return q_table
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Space Invaders")
-
+    q_table_save = "q_table.pkl"
     game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
     agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.15, gamma=1, alpha=0.1)
 
-    use_gui = True
+    #agent.q_table = agent.load_qtable(q_table_save) # load previous q table
+
+    use_gui = False
     simulation_mode = True  # Hinzufügen der simulation_mode Variable
 
     if use_gui and not simulation_mode:
@@ -126,7 +138,7 @@ def main():
         agent.set_alpha(gui.alpha)
 
     scores = []
-    for i in range(10000):
+    for i in range(100000):
         game.reset()
         game.game_over = False
         agent.reset()
@@ -164,6 +176,9 @@ def main():
                 if use_gui and not simulation_mode:
                     gui.root.update()
         agent.plot(scores)
+        if i == 30500:
+            agent.save_qtable(q_table_save)
+
     plt.show()
     pygame.quit()
 
