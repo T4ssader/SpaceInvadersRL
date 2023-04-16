@@ -45,9 +45,25 @@ class QLearningGUI:
         next_episode_button = tk.Button(self.root, text="Next Episode", command=self.next_episode)
         next_episode_button.grid(row=3, column=1)
 
+        # Create Print Q-Table button
+        print_q_table_button = tk.Button(self.root, text="Print Q-Table", command=self.print_q_table)
+        print_q_table_button.grid(row=4, column=0)
+
+        # Create Print Best Action button
+        print_best_action_button = tk.Button(self.root, text="Print Best Action", command=self.print_best_action)
+        print_best_action_button.grid(row=4, column=1)
+
+        # Method to print Q-Table
+    def print_q_table(self):
+        print(self.agent.q_table)
+
     def set_epsilon(self, val):
         self.epsilon = float(val)
         self.agent.set_epsilon(self.epsilon)
+
+    # Method to print Best Action
+    def print_best_action(self):
+        prtint("Best ACtion?")
 
     def set_gamma(self, val):
         self.gamma = float(val)
