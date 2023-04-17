@@ -164,7 +164,7 @@ def main():
 
                     if not simulation_mode or (gui is not None and gui.game_draw_enabled):
                         game.draw(agent=agent)
-                        time.sleep(0.01)
+                        #time.sleep(0.01)
                         if use_gui:
                             gui.root.update()
 
@@ -181,6 +181,7 @@ def main():
                 if use_gui and not simulation_mode:
                     gui.root.update()
         agent.plot(scores)
+        print(agent.q_table)
     plt.show()
     pygame.quit()
 

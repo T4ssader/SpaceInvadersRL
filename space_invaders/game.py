@@ -8,7 +8,7 @@ import random
 
 
 class Game:
-    def __init__(self, screen, rows=2, cols=3, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=False,
+    def __init__(self, screen, rows=3, cols=6, game_speed=5, enemies_attack=False, enemy_attackspeed=0.01, ai=False,
                  danger_threshold=30):
         self.screen = screen
         self.rows = rows
@@ -73,14 +73,26 @@ class Game:
         player_x = self.player.rect.x
         player_y = self.player.rect.y
         state = []
+
+        #add army pos
+        state.append(self.enemies_matrix[0][0].rect.x-player_x)
+        state.append(self.enemies_matrix[0][0].rect.y-player_y)
+
         for enemies in self.enemies_matrix:
             for enemy in enemies:
                 if enemy is not None and enemy.alive:
-                    state.append(enemy.rect.x - player_x)
-                    state.append(enemy.rect.y - player_y)
+                    state.append(1)
                 else:
-                    state.append(-1)
-                    state.append(-1)
+                    state.append(0)
+
+        # for enemies in self.enemies_matrix:
+        #     for enemy in enemies:
+        #         if enemy is not None and enemy.alive:
+        #             state.append(enemy.rect.x - player_x)
+        #             state.append(enemy.rect.y - player_y)
+        #         else:
+        #             state.append(-1)
+        #             state.append(-1)
         danger_left, danger_right = self.enemy_bullet_positions(self.player, self.bullets, self.danger_threshold)
         state.append(danger_left)
         state.append(danger_right)
@@ -157,10 +169,10 @@ class Game:
         enemy.kill()
         self.enemies.remove(enemy)
 
-        for enemy_list in self.enemies_matrix:
-            if enemy in enemy_list:
-                index = enemy_list.index(enemy)
-                enemy_list[index] = None
+        # for enemy_list in self.enemies_matrix:
+        #     if enemy in enemy_list:
+        #         index = enemy_list.index(enemy)
+        #         enemy_list[index] = None
 
     def any_enemies_alive(self):
         any_alive = False
@@ -188,13 +200,6 @@ class Game:
             self.handle_input(keys=keys, action=None)
 
         old_score = self.score
-        # Enemy movement control
-        # if self.counter % 30 == 0:
-        #     for enemy in self.enemies:
-        #         enemy.move()
-        #         if enemy.rect.bottom > self.screen.get_height():
-        #             self.player.lives -= 1
-        #             self.remove_enemy(enemy)
 
         for enemy in self.enemies:
             if enemy.rect.x < 10 and self.enemy_speed_x < 0 or enemy.rect.x > 790 - enemy.rect.width and self.enemy_speed_x > 0:
