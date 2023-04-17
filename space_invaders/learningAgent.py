@@ -16,6 +16,7 @@ ax.set_xlim(0, 1000)
 ax.set_ylim(0, 500)
 mean_scores = []
 
+
 class QLearningAgent:
     def __init__(self, actions, epsilon=0.3, gamma=0.99, alpha=0.01):
         self.q_table = {}  # Q-Tabelle zur Speicherung der Q-Werte
@@ -29,7 +30,7 @@ class QLearningAgent:
 
     def plot(self, scores):
         display.clear_output(wait=True)
-        #display.display(plt.gcf())
+        # display.display(plt.gcf())
         plt.clf()
         plt.title('Training...')
         plt.xlabel('Number of Games')
@@ -38,7 +39,10 @@ class QLearningAgent:
         sum_score = 0
         for score in scores:
             sum_score += score
-        mean_scores.append(sum_score / len(scores))
+        if len(scores) <= 100:
+            mean_scores.append(sum_score / len(scores))
+        else:
+            mean_scores.append(sum_score / 100)
 
         plt.plot(mean_scores)
         plt.text(len(scores) - 1, scores[-1], str(scores[-1]))
@@ -154,7 +158,7 @@ def main():
                 for _ in range(steps_to_execute):
                     if game.game_over:
                         break
-                    #agent.updateActions(game)
+                    # agent.updateActions(game)
                     next_state, reward = game.update(action)
                     score += reward
                     next_action = agent.choose_action(next_state, game)
@@ -164,7 +168,7 @@ def main():
 
                     if not simulation_mode or (gui is not None and gui.game_draw_enabled):
                         game.draw(agent=agent)
-                        #time.sleep(0.01)
+                        # time.sleep(0.01)
                         if use_gui:
                             gui.root.update()
 
@@ -188,5 +192,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
