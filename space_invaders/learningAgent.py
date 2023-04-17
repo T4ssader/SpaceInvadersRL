@@ -128,7 +128,7 @@ def main():
     game = Game(screen, rows=3, cols=6, game_speed=1, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
     agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.15, gamma=1, alpha=0.2)
 
-    use_gui = True
+    use_gui = False
     simulation_mode = False  # Hinzufügen der simulation_mode Variable
 
     if use_gui and not simulation_mode:
@@ -136,6 +136,8 @@ def main():
         agent.set_epsilon(gui.epsilon)
         agent.set_gamma(gui.gamma)
         agent.set_alpha(gui.alpha)
+    else:
+        gui = None
 
     scores = []
     for i in range(10000):
@@ -159,7 +161,8 @@ def main():
                     agent.update(reward, state, action)
 
                     # Zeichnen und GUI-Aktualisierung nur, wenn simulation_mode deaktiviert ist
-                    if not simulation_mode and gui.game_draw_enabled:
+
+                    if not simulation_mode or (gui is not None and gui.game_draw_enabled):
                         game.draw(agent=agent)
                         time.sleep(0.01)
                         if use_gui:
@@ -169,7 +172,7 @@ def main():
                     action = next_action
                     if game.game_over:
                         scores.append(score)
-                        if not simulation_mode and gui.game_draw_enabled:
+                        if not simulation_mode and gui is not None and gui.game_draw_enabled:
                             print(f"Episode {i}: score={score}")
                 if use_gui and not simulation_mode and gui.game_draw_enabled:
                     gui.steps_to_execute = 0
