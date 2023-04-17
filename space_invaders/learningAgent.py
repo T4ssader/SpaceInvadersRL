@@ -133,7 +133,7 @@ def main():
     agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.15, gamma=1, alpha=0.2)
 
     use_gui = False
-    simulation_mode = False  # Hinzufügen der simulation_mode Variable
+    simulation_mode = True  # Hinzufügen der simulation_mode Variable
 
     if use_gui and not simulation_mode:
         gui = QLearningGUI(game, agent)
@@ -185,7 +185,6 @@ def main():
                 if use_gui and not simulation_mode:
                     gui.root.update()
         agent.plot(scores)
-        print(agent.q_table)
     plt.show()
     pygame.quit()
 
