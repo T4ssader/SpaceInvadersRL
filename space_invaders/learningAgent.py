@@ -37,12 +37,21 @@ class QLearningAgent:
         plt.ylabel('Score')
         plt.plot(scores)
         sum_score = 0
-        for score in scores:
-            sum_score += score
-        if len(scores) <= 100:
+        old = True
+
+        if old:
+            for score in scores:
+                sum_score += score
             mean_scores.append(sum_score / len(scores))
         else:
-            mean_scores.append(sum_score / 100)
+            if len(scores) < 100:
+                for score in scores:
+                    sum_score += score
+                mean_scores.append(sum_score / len(scores))
+            else:
+                last_100_scores = scores[-100:]
+                sum_score = sum(last_100_scores)
+                mean_scores.append(sum_score / len(last_100_scores))
 
         plt.plot(mean_scores)
         plt.text(len(scores) - 1, scores[-1], str(scores[-1]))
@@ -129,8 +138,8 @@ def main():
     screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Space Invaders")
 
-    game = Game(screen, rows=3, cols=6, game_speed=1, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
-    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.15, gamma=1, alpha=0.2)
+    game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
+    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.15, gamma=1, alpha=0.1)
 
     use_gui = False
     simulation_mode = True  # Hinzufügen der simulation_mode Variable
@@ -144,7 +153,7 @@ def main():
         gui = None
 
     scores = []
-    for i in range(10000):
+    for i in range(100000):
         game.reset()
         game.game_over = False
         agent.reset()
@@ -170,6 +179,7 @@ def main():
                         game.draw(agent=agent)
                         # time.sleep(0.01)
                         if use_gui:
+                            #gui.update()
                             gui.root.update()
 
                     state = next_state
@@ -183,8 +193,11 @@ def main():
                     action = next_action
             else:
                 if use_gui and not simulation_mode:
+                    #gui.update()
                     gui.root.update()
         agent.plot(scores)
+        if i % 100 == 0:
+            agent.set_epsilon(agent.epsilon * 0.95)
     plt.show()
     pygame.quit()
 
