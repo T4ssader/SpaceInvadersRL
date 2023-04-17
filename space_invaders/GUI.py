@@ -11,6 +11,10 @@ class QLearningGUI:
         self.alpha = agent.alpha
         self.create_widgets()
         self.steps_to_execute = 0
+        self.game_draw_enabled = True
+
+    def toggle_game_draw(self):
+        self.game_draw_enabled = not self.game_draw_enabled
 
     def create_widgets(self):
         # Create Epsilon label and scale widget
@@ -50,8 +54,12 @@ class QLearningGUI:
         print_q_table_button.grid(row=4, column=0)
 
         # Create Print Best Action button
-        print_best_action_button = tk.Button(self.root, text="Print Best Action", command=self.print_best_action)
+        print_best_action_button = tk.Button(self.root, text="Stop Unlimited Run", command=self.print_best_action)
         print_best_action_button.grid(row=4, column=1)
+
+        # Create Toggle Game Draw button
+        toggle_game_draw_button = tk.Button(self.root, text="Toggle Game Draw", command=self.toggle_game_draw)
+        toggle_game_draw_button.grid(row=5, column=0)
 
         # Method to print Q-Table
     def print_q_table(self):
@@ -63,7 +71,8 @@ class QLearningGUI:
 
     # Method to print Best Action
     def print_best_action(self):
-        prtint("Best ACtion?")
+        print(self.agent.choose_action(self.game.get_state(), game=self.game))
+        self.steps_to_execute = 0
 
     def set_gamma(self, val):
         self.gamma = float(val)

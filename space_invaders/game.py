@@ -266,7 +266,7 @@ class Game:
         self.enemies.draw(self.screen)
         self.bullets.draw(self.screen)
         if agent is not None:
-            best_action = agent.choose_action(self.get_state())
+            best_action = agent.choose_action(self.get_state(), self)
             self.draw_best_action_arrow(best_action)
         pygame.display.flip()
 

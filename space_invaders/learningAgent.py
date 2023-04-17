@@ -1,4 +1,6 @@
 import random
+import time
+
 import matplotlib.pyplot as plt
 from IPython import display
 import pygame
@@ -23,6 +25,7 @@ class QLearningAgent:
         self.alpha = alpha  # Lernrate
         self.prev_state = None  # vorheriger Zustand des Agenten
         self.prev_action = None  # vorherige Aktion des Agenten
+        self.mode = True
 
     def plot(self, scores):
         display.clear_output(wait=True)
@@ -64,21 +67,30 @@ class QLearningAgent:
         self.prev_action = action
 
     # Funktion zum Auswählen einer Aktion basierend auf der Epsilon-greedy Strategie
-    def choose_action(self, state):
-        # print(self.epsilon)
+    def choose_action(self, state, game):
+        does_player_bullet_exist = game.is_allowed_to_shoot()
+
         if random.random() < self.epsilon:  # Wähle mit einer Wahrscheinlichkeit von Epsilon eine zufällige Aktion
-            action = random.choice(self.actions)
-            # print(action)
+            if does_player_bullet_exist:
+                action = random.choice([1, 2])
+            else:
+                action = random.choice(self.actions)
         else:  # Wähle sonst die Aktion mit dem höchsten Q-Wert
-            q_values = [self.get_q_value(state, a) for a in self.actions]
+            if does_player_bullet_exist:
+                available_actions = [1, 2]
+            else:
+                available_actions = self.actions
+
+            q_values = [self.get_q_value(state, a) for a in available_actions]
             max_q_value = max(q_values)
             count_max = q_values.count(max_q_value)
             if count_max > 1:  # Bei mehreren maximalen Q-Werten, wähle zufällig einen
-                best_indices = [i for i in range(len(self.actions)) if q_values[i] == max_q_value]
+                best_indices = [i for i in range(len(available_actions)) if q_values[i] == max_q_value]
                 i = random.choice(best_indices)
             else:
                 i = q_values.index(max_q_value)
-            action = self.actions[i]
+
+            action = available_actions[i]
 
         return action
 
@@ -113,11 +125,11 @@ def main():
     screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Space Invaders")
 
-    game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
-    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.15, gamma=1, alpha=0.1)
+    game = Game(screen, rows=3, cols=6, game_speed=1, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
+    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.15, gamma=1, alpha=0.2)
 
     use_gui = True
-    simulation_mode = True  # Hinzufügen der simulation_mode Variable
+    simulation_mode = False  # Hinzufügen der simulation_mode Variable
 
     if use_gui and not simulation_mode:
         gui = QLearningGUI(game, agent)
@@ -131,7 +143,7 @@ def main():
         game.game_over = False
         agent.reset()
         state = game.get_state()
-        action = agent.choose_action(state)
+        action = agent.choose_action(state, game)
         score = 0
 
         while not game.game_over:
@@ -140,15 +152,16 @@ def main():
                 for _ in range(steps_to_execute):
                     if game.game_over:
                         break
-                    agent.updateActions(game)
+                    #agent.updateActions(game)
                     next_state, reward = game.update(action)
                     score += reward
-                    next_action = agent.choose_action(next_state)
+                    next_action = agent.choose_action(next_state, game)
                     agent.update(reward, state, action)
 
                     # Zeichnen und GUI-Aktualisierung nur, wenn simulation_mode deaktiviert ist
-                    if not simulation_mode:
+                    if not simulation_mode and gui.game_draw_enabled:
                         game.draw(agent=agent)
+                        time.sleep(0.01)
                         if use_gui:
                             gui.root.update()
 
@@ -156,10 +169,11 @@ def main():
                     action = next_action
                     if game.game_over:
                         scores.append(score)
-                        if not simulation_mode:
+                        if not simulation_mode and gui.game_draw_enabled:
                             print(f"Episode {i}: score={score}")
-                if use_gui and not simulation_mode:
+                if use_gui and not simulation_mode and gui.game_draw_enabled:
                     gui.steps_to_execute = 0
+                    action = next_action
             else:
                 if use_gui and not simulation_mode:
                     gui.root.update()
