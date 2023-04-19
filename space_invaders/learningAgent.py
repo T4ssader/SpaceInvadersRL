@@ -150,7 +150,7 @@ def main():
     game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
     agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.9, gamma=1, alpha=0.1)
 
-    use_gui = True
+    use_gui = False
     simulation_mode = False  # Hinzufügen der simulation_mode Variable
 
     if use_gui and not simulation_mode:
@@ -181,7 +181,7 @@ def main():
                     score += reward
                     next_action = agent.choose_action(next_state, game)
                     agent.update(reward, state, action)
-
+                    time.sleep(.01)
                     # Zeichnen und GUI-Aktualisierung nur, wenn simulation_mode deaktiviert ist
 
                     if not simulation_mode or (gui is not None and gui.game_draw_enabled):

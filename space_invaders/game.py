@@ -78,21 +78,24 @@ class Game:
         state.append(self.enemies_matrix[0][0].rect.x-player_x)
         state.append(self.enemies_matrix[0][0].rect.y-player_y)
 
-        for enemies in self.enemies_matrix:
-            for enemy in enemies:
-                if enemy is not None and enemy.alive:
-                    state.append(1)
-                else:
-                    state.append(0)
-
         # for enemies in self.enemies_matrix:
         #     for enemy in enemies:
         #         if enemy is not None and enemy.alive:
-        #             state.append(enemy.rect.x - player_x)
-        #             state.append(enemy.rect.y - player_y)
+        #             state.append(1)
         #         else:
-        #             state.append(-1)
-        #             state.append(-1)
+        #             state.append(0)
+
+        alive_in_column = [False] * self.cols
+
+        for j in range(self.cols):
+            for i in range(len(self.enemies_matrix)):
+                enemy = self.enemies_matrix[i][j]
+                if enemy is not None and enemy.alive():
+                    alive_in_column[j] = True
+                    break
+        for alive in alive_in_column:
+            state.append(alive)
+
         danger_left, danger_right = self.enemy_bullet_positions(self.player, self.bullets, self.danger_threshold)
         state.append(danger_left)
         state.append(danger_right)
@@ -166,13 +169,10 @@ class Game:
             self.bullets.add(bullet)
 
     def remove_enemy(self, enemy):
+        enemy.die()
         enemy.kill()
         self.enemies.remove(enemy)
 
-        # for enemy_list in self.enemies_matrix:
-        #     if enemy in enemy_list:
-        #         index = enemy_list.index(enemy)
-        #         enemy_list[index] = None
 
     def any_enemies_alive(self):
         any_alive = False

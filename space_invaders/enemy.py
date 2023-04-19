@@ -12,15 +12,22 @@ class Enemy(pygame.sprite.Sprite):
         self.row = row
         self.col_pos = col_pos
         self.row_pos = row_pos
+        self.shot = False
 
     def update(self, speed_x, speed_y):
         self.rect.x += speed_x
         self.rect.y += speed_y
 
+    def die(self):
+        self.shot = True
+
+    def has_been_shot(self):
+        return self.shot
+
+
     # def update(self, pos_x, pos_y):
     #     self.rect.x = pos_x
     #     self.rect.y = pos_y
-
 
     # def move(self):
     #     next_col = (self.col + 1) % (len(self.col_pos)-1)
@@ -31,4 +38,3 @@ class Enemy(pygame.sprite.Sprite):
     #     new_pos_x = self.col_pos[self.col]
     #     new_pos_y = self.row_pos[self.row]
     #     self.update(new_pos_x, new_pos_y)
-
