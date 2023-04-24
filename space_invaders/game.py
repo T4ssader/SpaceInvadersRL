@@ -208,6 +208,7 @@ class Game:
                 break
             if enemy.rect.bottom > self.screen.get_height():
                 self.player.lives -= 1
+                self.score -= 500
                 self.remove_enemy(enemy)
         if self.player.lives <= 0:
             self.game_over = True
@@ -240,6 +241,7 @@ class Game:
                         self.game_over = True
 
         if pygame.sprite.spritecollideany(self.player, self.enemies) or not self.any_enemies_alive():
+            self.score -= 1500
             self.game_over = True
         if self.game_over and self.ai == False:
             self.reset()

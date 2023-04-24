@@ -20,5 +20,14 @@ def main():
     game.run()
 
 
+
+
+
 if __name__ == "__main__":
+
+    x = 0.9
+    for i in range(30000):
+        x= x * 0.99995
+    print(x)
+
     main()

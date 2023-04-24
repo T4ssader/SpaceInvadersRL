@@ -149,8 +149,9 @@ def main():
 
     game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
     agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.9, gamma=1, alpha=0.1)
-
-    use_gui = False
+    #agent.load_q_table("q_table65kfixed09995.pkl")
+    #agent.load_q_table("q_table0999deprecation.pkl")
+    use_gui = True
     simulation_mode = False  # Hinzufügen der simulation_mode Variable
 
     if use_gui and not simulation_mode:
@@ -206,8 +207,8 @@ def main():
                     gui.root.update()
         agent.plot(scores)
 
-        agent.set_epsilon(agent.epsilon * 0.999)
-        agent.set_epsilon(agent.alpha * 0.999)
+        agent.set_epsilon(agent.epsilon * 0.9995)
+        agent.set_epsilon(agent.alpha * 0.9995)
         if i % 3000 == 0:
             agent.save_q_table("q_table.pkl")
 
