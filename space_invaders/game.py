@@ -8,8 +8,8 @@ import random
 
 
 class Game:
-    def __init__(self, screen, rows=3, cols=6, game_speed=5, enemies_attack=False, enemy_attackspeed=0.01, ai=False,
-                 danger_threshold=30):
+    def __init__(self, screen, rows=3, cols=6, game_speed=1, enemies_attack=True, enemy_attackspeed=0.01, ai=False,
+                 danger_threshold=100):
         self.screen = screen
         self.rows = rows
         self.cols = cols
@@ -61,7 +61,7 @@ class Game:
                 bullet_x, bullet_y = bullet.rect.center
                 distance = sqrt((bullet_x - player_x) ** 2 + (bullet_y - player_y) ** 2)
 
-                if distance <= distance_threshold:
+                if distance <= distance_threshold and bullet_y > player_y + 15:
                     if bullet_x < player_x:
                         left = True
                     elif bullet_x > player_x:
@@ -74,9 +74,9 @@ class Game:
         player_y = self.player.rect.y
         state = []
 
-        #add army pos
-        state.append(self.enemies_matrix[0][0].rect.x-player_x)
-        state.append(self.enemies_matrix[0][0].rect.y-player_y)
+        # add army pos
+        state.append(self.enemies_matrix[0][0].rect.x - player_x)
+        state.append(self.enemies_matrix[0][0].rect.y - player_y)
 
         # for enemies in self.enemies_matrix:
         #     for enemy in enemies:
@@ -172,7 +172,6 @@ class Game:
         enemy.die()
         enemy.kill()
         self.enemies.remove(enemy)
-
 
     def any_enemies_alive(self):
         any_alive = False
@@ -275,7 +274,15 @@ class Game:
         if agent is not None:
             best_action = agent.choose_action(self.get_state(), self)
             self.draw_best_action_arrow(best_action)
+
+        self.draw_danger_area()
+
         pygame.display.flip()
+
+    def draw_danger_area(self):
+        player_x, player_y = self.player.rect.center
+        danger_color = (255, 0, 0)
+        pygame.draw.circle(self.screen, danger_color, (player_x, player_y), self.danger_threshold, 2)
 
     def draw_best_action_arrow(self, best_action):
         arrow_size = 20
@@ -297,4 +304,3 @@ class Game:
             pygame.draw.line(self.screen, arrow_color,
                              (self.player.rect.right, self.player.rect.centery),
                              (self.player.rect.right + int(arrow_size * 1.5), self.player.rect.centery - arrow_size), 3)
-

@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     x = 0.9
     for i in range(30000):
-        x= x * 0.99995
+        x= x * 0.9999
     print(x)
 
     main()
