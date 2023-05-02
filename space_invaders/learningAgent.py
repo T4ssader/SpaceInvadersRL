@@ -208,8 +208,8 @@ def main():
                     gui.root.update()
         agent.plot(scores)
 
-        agent.set_epsilon(agent.epsilon * 0.9995)
-        agent.set_epsilon(agent.alpha * 0.9995)
+        agent.set_epsilon(agent.epsilon * 0.9999)
+        agent.set_alpha(agent.alpha * 0.9999)
         if i % 3000 == 0:
             agent.save_q_table("q_table.pkl")
             plt.savefig('training_plot.png')
