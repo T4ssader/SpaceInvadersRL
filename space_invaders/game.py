@@ -53,21 +53,34 @@ class Game:
     def enemy_bullet_positions(self, player, bullets, distance_threshold):
         player_x, player_y = player.rect.center
 
-        left = False
-        right = False
-
+        left_limit = player.rect.left
+        right_limit = player.rect.right
+        danger = False
         for bullet in bullets:
             if not bullet.player_bullet:  # Check if the bullet is an enemy bullet
                 bullet_x, bullet_y = bullet.rect.center
-                distance = sqrt((bullet_x - player_x) ** 2 + (bullet_y - player_y) ** 2)
+                distance = player_y - bullet_y
+                if left_limit <= bullet_x <= right_limit:
+                    if distance <= distance_threshold:
+                        danger = True
 
-                if distance <= distance_threshold and bullet_y > player_y + 15:
-                    if bullet_x < player_x:
-                        left = True
-                    elif bullet_x > player_x:
-                        right = True
+        return danger
 
-        return left, right
+        # left = False
+        # right = False
+        #
+        # for bullet in bullets:
+        #     if not bullet.player_bullet:  # Check if the bullet is an enemy bullet
+        #         bullet_x, bullet_y = bullet.rect.center
+        #         distance = sqrt((bullet_x - player_x) ** 2 + (bullet_y - player_y) ** 2)
+        #
+        #         if distance <= distance_threshold and bullet_y > player_y + 15:
+        #             if bullet_x < player_x:
+        #                 left = True
+        #             elif bullet_x > player_x:
+        #                 right = True
+        #
+        # return left, right
 
     def get_state(self):
         player_x = self.player.rect.x
@@ -96,9 +109,8 @@ class Game:
         for alive in alive_in_column:
             state.append(alive)
 
-        danger_left, danger_right = self.enemy_bullet_positions(self.player, self.bullets, self.danger_threshold)
-        state.append(danger_left)
-        state.append(danger_right)
+        danger = self.enemy_bullet_positions(self.player, self.bullets, self.danger_threshold)
+        state.append(danger)
         return state
 
     def reset(self):

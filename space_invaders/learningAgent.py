@@ -152,8 +152,8 @@ def main():
     #agent.load_q_table("q_table65kfixed09995.pkl")
     #agent.load_q_table("q_table0999deprecation.pkl")
     #agent.load_q_table("q_table_post_fix100k.pkl")
-    use_gui = False
-    simulation_mode = True  # Hinzufügen der simulation_mode Variable
+    use_gui = True
+    simulation_mode = False  # Hinzufügen der simulation_mode Variable
 
     if use_gui and not simulation_mode:
         gui = QLearningGUI(game, agent)
