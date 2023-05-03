@@ -152,7 +152,7 @@ def main():
     #agent.load_q_table("disappearBug.pkl")
     #agent.load_q_table("collisionBug.pkl")
     #agent.load_q_table("afterBugs.pkl")
-    agent.load_q_table("currbest.pkl")
+    #agent.load_q_table("currbest.pkl")
     use_gui = True
     simulation_mode = False  # Hinzufügen der simulation_mode Variable
 

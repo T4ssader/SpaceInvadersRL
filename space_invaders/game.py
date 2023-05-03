@@ -1,15 +1,18 @@
+import math
+
 import pygame
 from math import sqrt
 from pygame.locals import *
 from space_invaders.player import Player
 from space_invaders.enemy import Enemy
 from space_invaders.bullet import Bullet
+import numpy as np
 import random
 
 
 class Game:
     def __init__(self, screen, rows=3, cols=6, game_speed=1, enemies_attack=True, enemy_attackspeed=0.01, ai=False,
-                 danger_threshold=100):
+                 danger_threshold=150):
         self.screen = screen
         self.rows = rows
         self.cols = cols
@@ -53,19 +56,149 @@ class Game:
     def enemy_bullet_positions(self, player, bullets, distance_threshold):
         player_x, player_y = player.rect.center
 
-        left_limit = player.rect.left - 21
-        right_limit = player.rect.right + 21
-        danger = False
+        fieldk0c0 = False
+        fieldk1c0 = False
+        fieldk2c0 = False
+        fieldk3c0 = False
+        fieldk4c0 = False
+
+        fieldk0c1 = False
+        fieldk1c1 = False
+        fieldk2c1 = False
+        fieldk3c1 = False
+        fieldk4c1 = False
+
+        # fieldk0c2 = False
+        fieldk1c2 = False
+        fieldk2c2 = False
+        fieldk3c2 = False
+        # fieldk4c2 = False
+
         for bullet in bullets:
             if not bullet.player_bullet:  # Check if the bullet is an enemy bullet
                 bullet_x, bullet_y = bullet.rect.center
-                distance = player_y - bullet_y
-                if left_limit <= bullet_x <= right_limit and bullet_y <= player_y:
-                    if distance <= distance_threshold:
-                        danger = True
-        if danger:
-            self.draw_danger_area()
-        return danger
+
+                gk = np.absolute(player_y - bullet_y)
+                ak = np.absolute(player_x - bullet_x)
+                total_distance = sqrt((bullet_x - player_x) ** 2 + (bullet_y - player_y) ** 2)
+                angle = np.degrees(np.arctan(gk / ak))
+
+                k0d = 0
+                k1d = 36
+                k2d = 72
+                k3d = 108
+                k4d = 144
+                k5d = 180
+
+                c0 = distance_threshold / 3
+                c1 = distance_threshold / 3 * 2
+                c2 = distance_threshold
+
+                if k0d <= angle <= k1d:
+                    if 0 <= total_distance <= c0:
+
+                        print("Danger in: " + "k0c0")
+
+                        fieldk0c0 = True
+                    elif c0 <= total_distance <= c1:
+
+                        print("Danger in: " + "k0c1")
+
+                        fieldk0c1 = True
+                    # elif c1 <= total_distance <= c2:
+                    #
+                    #     print("Danger in: " + "fieldk0c2")
+                    #
+                    #     fieldk0c2 = True
+                elif k1d <= angle <= k2d:
+                    if 0 <= total_distance <= c0:
+
+                        print("Danger in: " + "fieldk1c0")
+
+                        fieldk1c0 = True
+                    elif c0 <= total_distance <= c1:
+
+                        print("Danger in: " + "fieldk1c1")
+
+                        fieldk1c1 = True
+                    elif c1 <= total_distance <= c2:
+
+                        print("Danger in: " + "fieldk1c2")
+
+                        fieldk1c2 = True
+                elif k2d <= angle <= k3d:
+                    if 0 <= total_distance <= c0:
+
+                        print("Danger in: " + "fieldk2c0")
+
+                        fieldk2c0 = True
+                    elif c0 <= total_distance <= c1:
+
+                        print("Danger in: " + "fieldk2c1")
+
+                        fieldk2c1 = True
+                    elif c1 <= total_distance <= c2:
+
+                        print("Danger in: " + "fieldk2c2")
+
+                        fieldk2c2 = True
+                elif k3d <= angle <= k4d:
+                    if 0 <= total_distance <= c0:
+
+                        print("Danger in: " + "fieldk3c0")
+
+                        fieldk3c0 = True
+                    elif c0 <= total_distance <= c1:
+
+                        print("Danger in: " + "fieldk3c1")
+
+                        fieldk3c1 = True
+                    elif c1 <= total_distance <= c2:
+
+                        print("Danger in: " + "fieldk3c2")
+
+                        fieldk3c2 = True
+                elif k4d <= angle <= k5d:
+                    if 0 <= total_distance <= c0:
+
+                        print("Danger in: " + "fieldk4c0")
+
+                        fieldk4c0 = True
+                    elif c0 <= total_distance <= c1:
+
+                        print("Danger in: " + "fieldk4c1")
+
+                        fieldk4c1 = True
+                    # elif c1 <= total_distance <= c2:
+                    #
+                    #     print("Danger in: " + "fieldk4c2")
+                    #
+                    #     fieldk4c2 = True
+
+        fields = [fieldk0c0, fieldk1c0, fieldk2c0, fieldk3c0, fieldk4c0, fieldk0c1, fieldk1c1, fieldk2c1, fieldk3c1,
+                  fieldk4c1, fieldk1c2, fieldk2c2, fieldk3c2]
+        for field in fields:
+            if field:
+                print("Angle: " + str(angle))
+                print("Distance: " + str(total_distance))
+
+        self.draw_danger_area()
+        return fields
+        # player_x, player_y = player.rect.center
+        #
+        # left_limit = player.rect.left - 21
+        # right_limit = player.rect.right + 21
+        # danger = False
+        # for bullet in bullets:
+        #     if not bullet.player_bullet:  # Check if the bullet is an enemy bullet
+        #         bullet_x, bullet_y = bullet.rect.center
+        #         distance = player_y - bullet_y
+        #         if left_limit <= bullet_x <= right_limit and bullet_y <= player_y:
+        #             if distance <= distance_threshold:
+        #                 danger = True
+        # if danger:
+        #     self.draw_danger_area()
+        # return danger
 
         # left = False
         # right = False
@@ -103,10 +236,12 @@ class Game:
         for alive in alive_in_column:
             state.append(alive)
 
-        danger = self.enemy_bullet_positions(self.player, self.bullets, self.danger_threshold)
-        state.append(danger)
-        #For old showcase:
-        #state.append(False)
+        fields = self.enemy_bullet_positions(self.player, self.bullets, self.danger_threshold)
+        for field in fields:
+            state.append(field)
+
+        # For old showcase:
+        # state.append(False)
         return state
 
     def reset(self):
@@ -287,7 +422,7 @@ class Game:
             best_action = agent.choose_action(self.get_state(), self)
             self.draw_best_action_arrow(best_action)
 
-        #self.draw_danger_area()
+        # self.draw_danger_area()
 
         pygame.display.flip()
 
@@ -295,6 +430,32 @@ class Game:
         player_x, player_y = self.player.rect.center
         danger_color = (255, 0, 0)
         pygame.draw.circle(self.screen, danger_color, (player_x, player_y), self.danger_threshold, 2)
+        pygame.draw.circle(self.screen, danger_color, (player_x, player_y), self.danger_threshold / 3, 2)
+        pygame.draw.circle(self.screen, danger_color, (player_x, player_y), (self.danger_threshold / 3) * 2, 2)
+
+        start_point = (player_x, player_y)
+        end_point0 = (start_point[0] + self.danger_threshold * math.cos(math.radians(0)),
+                      start_point[1] - self.danger_threshold * math.sin(math.radians(0)))
+        end_point1 = (start_point[0] + self.danger_threshold * math.cos(math.radians(36)),
+                      start_point[1] - self.danger_threshold * math.sin(math.radians(36)))
+        end_point2 = (start_point[0] + self.danger_threshold * math.cos(math.radians(72)),
+                      start_point[1] - self.danger_threshold * math.sin(math.radians(72)))
+        end_point3 = (start_point[0] + self.danger_threshold * math.cos(math.radians(108)),
+                      start_point[1] - self.danger_threshold * math.sin(math.radians(108)))
+        end_point4 = (start_point[0] + self.danger_threshold * math.cos(math.radians(144)),
+                      start_point[1] - self.danger_threshold * math.sin(math.radians(144)))
+        end_point5 = (start_point[0] + self.danger_threshold * math.cos(math.radians(180)),
+                      start_point[1] - self.danger_threshold * math.sin(math.radians(180)))
+
+        pygame.draw.line(self.screen, danger_color, start_point, end_point0)
+        pygame.draw.line(self.screen, danger_color, start_point, end_point1)
+        pygame.draw.line(self.screen, danger_color, start_point, end_point2)
+        pygame.draw.line(self.screen, danger_color, start_point, end_point3)
+        pygame.draw.line(self.screen, danger_color, start_point, end_point4)
+        pygame.draw.line(self.screen, danger_color, start_point, end_point5)
+        # player_x, player_y = self.player.rect.center
+        # danger_color = (255, 0, 0)
+        # pygame.draw.circle(self.screen, danger_color, (player_x, player_y), self.danger_threshold, 2)
 
     def draw_best_action_arrow(self, best_action):
         arrow_size = 20
