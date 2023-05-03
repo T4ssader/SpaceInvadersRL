@@ -149,9 +149,10 @@ def main():
 
     game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
     agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.0, gamma=1, alpha=0)
-    #agent.load_q_table("q_table65kfixed09995.pkl")
-    #agent.load_q_table("q_table0999deprecation.pkl")
-    #agent.load_q_table("q_table_post_fix100k.pkl")
+    #agent.load_q_table("disappearBug.pkl")
+    #agent.load_q_table("collisionBug.pkl")
+    #agent.load_q_table("afterBugs.pkl")
+    agent.load_q_table("currbest.pkl")
     use_gui = True
     simulation_mode = False  # Hinzufügen der simulation_mode Variable
 
@@ -183,7 +184,7 @@ def main():
                     score += reward
                     next_action = agent.choose_action(next_state, game)
                     agent.update(reward, state, action)
-                    #time.sleep(.01)
+                    time.sleep(.01)
                     # Zeichnen und GUI-Aktualisierung nur, wenn simulation_mode deaktiviert ist
 
                     if not simulation_mode or (gui is not None and gui.game_draw_enabled):

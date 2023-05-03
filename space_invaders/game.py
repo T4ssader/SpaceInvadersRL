@@ -53,17 +53,18 @@ class Game:
     def enemy_bullet_positions(self, player, bullets, distance_threshold):
         player_x, player_y = player.rect.center
 
-        left_limit = player.rect.left
-        right_limit = player.rect.right
+        left_limit = player.rect.left - 21
+        right_limit = player.rect.right + 21
         danger = False
         for bullet in bullets:
             if not bullet.player_bullet:  # Check if the bullet is an enemy bullet
                 bullet_x, bullet_y = bullet.rect.center
                 distance = player_y - bullet_y
-                if left_limit <= bullet_x <= right_limit:
+                if left_limit <= bullet_x <= right_limit and bullet_y <= player_y:
                     if distance <= distance_threshold:
                         danger = True
-
+        if danger:
+            self.draw_danger_area()
         return danger
 
         # left = False
@@ -91,13 +92,6 @@ class Game:
         state.append(self.enemies_matrix[0][0].rect.x - player_x)
         state.append(self.enemies_matrix[0][0].rect.y - player_y)
 
-        # for enemies in self.enemies_matrix:
-        #     for enemy in enemies:
-        #         if enemy is not None and enemy.alive:
-        #             state.append(1)
-        #         else:
-        #             state.append(0)
-
         alive_in_column = [False] * self.cols
 
         for j in range(self.cols):
@@ -111,6 +105,8 @@ class Game:
 
         danger = self.enemy_bullet_positions(self.player, self.bullets, self.danger_threshold)
         state.append(danger)
+        #For old showcase:
+        #state.append(False)
         return state
 
     def reset(self):
@@ -291,7 +287,7 @@ class Game:
             best_action = agent.choose_action(self.get_state(), self)
             self.draw_best_action_arrow(best_action)
 
-        self.draw_danger_area()
+        #self.draw_danger_area()
 
         pygame.display.flip()
 
