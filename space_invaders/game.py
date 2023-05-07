@@ -97,12 +97,12 @@ class Game:
                 if k0d <= angle <= k1d:
                     if 0 <= total_distance <= c0:
 
-                        print("Danger in: " + "k0c0")
+                       # print("Danger in: " + "k0c0")
 
                         fieldk0c0 = True
                     elif c0 <= total_distance <= c1:
 
-                        print("Danger in: " + "k0c1")
+                      #  print("Danger in: " + "k0c1")
 
                         fieldk0c1 = True
                     # elif c1 <= total_distance <= c2:
@@ -113,60 +113,60 @@ class Game:
                 elif k1d <= angle <= k2d:
                     if 0 <= total_distance <= c0:
 
-                        print("Danger in: " + "fieldk1c0")
+                      #  print("Danger in: " + "fieldk1c0")
 
                         fieldk1c0 = True
                     elif c0 <= total_distance <= c1:
 
-                        print("Danger in: " + "fieldk1c1")
+                     #   print("Danger in: " + "fieldk1c1")
 
                         fieldk1c1 = True
                     elif c1 <= total_distance <= c2:
 
-                        print("Danger in: " + "fieldk1c2")
+                      #  print("Danger in: " + "fieldk1c2")
 
                         fieldk1c2 = True
                 elif k2d <= angle <= k3d:
                     if 0 <= total_distance <= c0:
 
-                        print("Danger in: " + "fieldk2c0")
+                      #  print("Danger in: " + "fieldk2c0")
 
                         fieldk2c0 = True
                     elif c0 <= total_distance <= c1:
 
-                        print("Danger in: " + "fieldk2c1")
+                      #  print("Danger in: " + "fieldk2c1")
 
                         fieldk2c1 = True
                     elif c1 <= total_distance <= c2:
 
-                        print("Danger in: " + "fieldk2c2")
+                      #  print("Danger in: " + "fieldk2c2")
 
                         fieldk2c2 = True
                 elif k3d <= angle <= k4d:
                     if 0 <= total_distance <= c0:
 
-                        print("Danger in: " + "fieldk3c0")
+                      #  print("Danger in: " + "fieldk3c0")
 
                         fieldk3c0 = True
                     elif c0 <= total_distance <= c1:
 
-                        print("Danger in: " + "fieldk3c1")
+                     #   print("Danger in: " + "fieldk3c1")
 
                         fieldk3c1 = True
                     elif c1 <= total_distance <= c2:
 
-                        print("Danger in: " + "fieldk3c2")
+                      #  print("Danger in: " + "fieldk3c2")
 
                         fieldk3c2 = True
                 elif k4d <= angle <= k5d:
                     if 0 <= total_distance <= c0:
 
-                        print("Danger in: " + "fieldk4c0")
+                      #  print("Danger in: " + "fieldk4c0")
 
                         fieldk4c0 = True
                     elif c0 <= total_distance <= c1:
 
-                        print("Danger in: " + "fieldk4c1")
+                     #   print("Danger in: " + "fieldk4c1")
 
                         fieldk4c1 = True
                     # elif c1 <= total_distance <= c2:
@@ -177,10 +177,10 @@ class Game:
 
         fields = [fieldk0c0, fieldk1c0, fieldk2c0, fieldk3c0, fieldk4c0, fieldk0c1, fieldk1c1, fieldk2c1, fieldk3c1,
                   fieldk4c1, fieldk1c2, fieldk2c2, fieldk3c2]
-        for field in fields:
-            if field:
-                print("Angle: " + str(angle))
-                print("Distance: " + str(total_distance))
+        # for field in fields:
+        #     if field:
+        #         print("Angle: " + str(angle))
+        #         print("Distance: " + str(total_distance))
 
         self.draw_danger_area()
         return fields
@@ -223,7 +223,8 @@ class Game:
 
         # add army pos
         state.append(self.enemies_matrix[0][0].rect.x - player_x)
-        state.append(self.enemies_matrix[0][0].rect.y - player_y)
+        #state.append(self.enemies_matrix[0][0].rect.y - player_y)
+        state.append(0)
 
         alive_in_column = [False] * self.cols
 

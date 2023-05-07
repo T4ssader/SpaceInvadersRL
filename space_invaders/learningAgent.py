@@ -148,12 +148,14 @@ def main():
     pygame.display.set_caption("Space Invaders")
 
     game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
-    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.0, gamma=1, alpha=0)
+    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.0, gamma=1, alpha=0.0)
     #agent.load_q_table("disappearBug.pkl")
     #agent.load_q_table("collisionBug.pkl")
     #agent.load_q_table("afterBugs.pkl")
     #agent.load_q_table("currbest.pkl")
-    use_gui = True
+    #agent.load_q_table("q_table.pkl")
+    agent.load_q_table("q_table_no_y_pos.pkl")
+    use_gui = False
     simulation_mode = False  # Hinzufügen der simulation_mode Variable
 
     if use_gui and not simulation_mode:
@@ -165,7 +167,7 @@ def main():
         gui = None
 
     scores = []
-    for i in range(100000):
+    for i in range(1000000):
         game.reset()
         game.game_over = False
         agent.reset()
@@ -184,12 +186,12 @@ def main():
                     score += reward
                     next_action = agent.choose_action(next_state, game)
                     agent.update(reward, state, action)
-                    time.sleep(.01)
+                    #time.sleep(.01)
                     # Zeichnen und GUI-Aktualisierung nur, wenn simulation_mode deaktiviert ist
 
                     if not simulation_mode or (gui is not None and gui.game_draw_enabled):
                         game.draw(agent=agent)
-                        # time.sleep(0.01)
+                        time.sleep(0.01)
                         if use_gui:
                             #gui.update()
                             gui.root.update()
@@ -209,10 +211,10 @@ def main():
                     gui.root.update()
         agent.plot(scores)
 
-        agent.set_epsilon(agent.epsilon * 0.9999)
-        agent.set_alpha(agent.alpha * 0.9999)
-        if i % 3000 == 0:
-            agent.save_q_table("q_table.pkl")
+        agent.set_epsilon(agent.epsilon * 0.99999)
+        agent.set_alpha(agent.alpha * 0.99999)
+        if i % 3000 == 0 and i != 0:
+            agent.save_q_table("q_table_no_y_pos.pkl")
             plt.savefig('training_plot.png')
             plt.show(block=False)
             plt.pause(.001)

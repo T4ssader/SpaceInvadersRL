@@ -26,8 +26,8 @@ def main():
 if __name__ == "__main__":
 
     x = 0.9
-    for i in range(30000):
-        x= x * 0.9999
+    for i in range(160000):
+        x= x * 0.99999
     print(x)
 
     main()
