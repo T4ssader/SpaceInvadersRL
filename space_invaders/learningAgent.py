@@ -8,14 +8,8 @@ import pygame
 from space_invaders.game import Game
 from space_invaders.GUI import QLearningGUI
 
+
 # Create an empty figure and axis
-plt.ion()
-fig, ax = plt.subplots()
-ax.set_xlabel('Episode')
-ax.set_ylabel('Score')
-ax.set_xlim(0, 1000)
-ax.set_ylim(0, 500)
-mean_scores = []
 
 
 class QLearningAgent:
@@ -58,8 +52,8 @@ class QLearningAgent:
         plt.text(len(scores) - 1, scores[-1], str(scores[-1]))
         plt.text(len(mean_scores) - 1, mean_scores[-1], str(mean_scores[-1]))
 
-        #plt.show(block=False)
-        #plt.pause(.001)
+        # plt.show(block=False)
+        # plt.pause(.001)
 
     def get_q_value(self, state, action):
         state = tuple(state)  # Konvertiere Zustand in ein Tuple
@@ -148,26 +142,35 @@ def main():
     pygame.display.set_caption("Space Invaders")
 
     game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
-    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.0, gamma=1, alpha=0.0)
-    #agent.load_q_table("disappearBug.pkl")
-    #agent.load_q_table("collisionBug.pkl")
-    #agent.load_q_table("afterBugs.pkl")
-    #agent.load_q_table("currbest.pkl")
-    #agent.load_q_table("q_table.pkl")
-    agent.load_q_table("q_table_no_y_pos.pkl")
+    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0.9, gamma=1, alpha=0.1)
+    # agent.load_q_table("currbest_radar.pkl")
+
+    # agent.load_q_table("collisionBug.pkl")
+
+    # agent.load_q_table("disappearBug.pkl")
+
+    # agent.load_q_table("q_table_yes_y_pos.pkl")
     use_gui = False
-    simulation_mode = False  # Hinzufügen der simulation_mode Variable
+    simulation_mode = True  # Hinzufügen der simulation_mode Variable
 
     if use_gui and not simulation_mode:
         gui = QLearningGUI(game, agent)
         agent.set_epsilon(gui.epsilon)
         agent.set_gamma(gui.gamma)
         agent.set_alpha(gui.alpha)
+
+        plt.ion()
+        fig, ax = plt.subplots()
+        ax.set_xlabel('Episode')
+        ax.set_ylabel('Score')
+        ax.set_xlim(0, 1000)
+        ax.set_ylim(0, 500)
+        mean_scores = []
     else:
         gui = None
 
     scores = []
-    for i in range(1000000):
+    for i in range(100):
         game.reset()
         game.game_over = False
         agent.reset()
@@ -186,14 +189,14 @@ def main():
                     score += reward
                     next_action = agent.choose_action(next_state, game)
                     agent.update(reward, state, action)
-                    #time.sleep(.01)
+                    # time.sleep(.01)
                     # Zeichnen und GUI-Aktualisierung nur, wenn simulation_mode deaktiviert ist
 
                     if not simulation_mode or (gui is not None and gui.game_draw_enabled):
                         game.draw(agent=agent)
                         time.sleep(0.01)
                         if use_gui:
-                            #gui.update()
+                            # gui.update()
                             gui.root.update()
 
                     state = next_state
@@ -207,19 +210,24 @@ def main():
                     action = next_action
             else:
                 if use_gui and not simulation_mode:
-                    #gui.update()
+                    # gui.update()
                     gui.root.update()
-        agent.plot(scores)
+
+        if use_gui:
+            agent.plot(scores)
 
         agent.set_epsilon(agent.epsilon * 0.99999)
         agent.set_alpha(agent.alpha * 0.99999)
         if i % 3000 == 0 and i != 0:
-            agent.save_q_table("q_table_no_y_pos.pkl")
-            plt.savefig('training_plot.png')
-            plt.show(block=False)
-            plt.pause(.001)
+            print("Updating q_table \nIn episode: " + str(i))
 
-    plt.show()
+            agent.save_q_table("q_table_new_function.pkl")
+
+            if use_gui:
+                plt.savefig('training_plot.png')
+                plt.show(block=False)
+                plt.pause(.001)
+
     pygame.quit()
 
 

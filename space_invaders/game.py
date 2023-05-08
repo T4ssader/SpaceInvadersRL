@@ -40,6 +40,8 @@ class Game:
         self.danger_threshold = danger_threshold
         self.counter = 0
 
+        self.fields = [False] * 13
+
     def init_cols_rows(self):
         spacing_x = 120
         spacing_y = 100
@@ -56,165 +58,31 @@ class Game:
     def enemy_bullet_positions(self, player, bullets, distance_threshold):
         player_x, player_y = player.rect.center
 
-        fieldk0c0 = False
-        fieldk1c0 = False
-        fieldk2c0 = False
-        fieldk3c0 = False
-        fieldk4c0 = False
+        angle_ranges = [(i * 36, (i + 1) * 36) for i in range(5)]
+        distance_ranges = [distance_threshold / 3, distance_threshold * 2 / 3, distance_threshold]
 
-        fieldk0c1 = False
-        fieldk1c1 = False
-        fieldk2c1 = False
-        fieldk3c1 = False
-        fieldk4c1 = False
-
-        # fieldk0c2 = False
-        fieldk1c2 = False
-        fieldk2c2 = False
-        fieldk3c2 = False
-        # fieldk4c2 = False
+        self.fields = [False] * 13
 
         for bullet in bullets:
-            if not bullet.player_bullet:  # Check if the bullet is an enemy bullet
+            if not bullet.player_bullet:
                 bullet_x, bullet_y = bullet.rect.center
 
-                gk = np.absolute(player_y - bullet_y)
-                ak = np.absolute(player_x - bullet_x)
-                total_distance = sqrt((bullet_x - player_x) ** 2 + (bullet_y - player_y) ** 2)
-                angle = np.degrees(np.arctan(gk / ak))
+                gk = abs(player_y - bullet_y)
+                ak = abs(player_x - bullet_x)
+                total_distance = math.hypot(bullet_x - player_x, bullet_y - player_y)
+                angle = math.degrees(math.atan(gk / ak))
 
-                k0d = 0
-                k1d = 36
-                k2d = 72
-                k3d = 108
-                k4d = 144
-                k5d = 180
-
-                c0 = distance_threshold / 3
-                c1 = distance_threshold / 3 * 2
-                c2 = distance_threshold
-
-                if k0d <= angle <= k1d:
-                    if 0 <= total_distance <= c0:
-
-                       # print("Danger in: " + "k0c0")
-
-                        fieldk0c0 = True
-                    elif c0 <= total_distance <= c1:
-
-                      #  print("Danger in: " + "k0c1")
-
-                        fieldk0c1 = True
-                    # elif c1 <= total_distance <= c2:
-                    #
-                    #     print("Danger in: " + "fieldk0c2")
-                    #
-                    #     fieldk0c2 = True
-                elif k1d <= angle <= k2d:
-                    if 0 <= total_distance <= c0:
-
-                      #  print("Danger in: " + "fieldk1c0")
-
-                        fieldk1c0 = True
-                    elif c0 <= total_distance <= c1:
-
-                     #   print("Danger in: " + "fieldk1c1")
-
-                        fieldk1c1 = True
-                    elif c1 <= total_distance <= c2:
-
-                      #  print("Danger in: " + "fieldk1c2")
-
-                        fieldk1c2 = True
-                elif k2d <= angle <= k3d:
-                    if 0 <= total_distance <= c0:
-
-                      #  print("Danger in: " + "fieldk2c0")
-
-                        fieldk2c0 = True
-                    elif c0 <= total_distance <= c1:
-
-                      #  print("Danger in: " + "fieldk2c1")
-
-                        fieldk2c1 = True
-                    elif c1 <= total_distance <= c2:
-
-                      #  print("Danger in: " + "fieldk2c2")
-
-                        fieldk2c2 = True
-                elif k3d <= angle <= k4d:
-                    if 0 <= total_distance <= c0:
-
-                      #  print("Danger in: " + "fieldk3c0")
-
-                        fieldk3c0 = True
-                    elif c0 <= total_distance <= c1:
-
-                     #   print("Danger in: " + "fieldk3c1")
-
-                        fieldk3c1 = True
-                    elif c1 <= total_distance <= c2:
-
-                      #  print("Danger in: " + "fieldk3c2")
-
-                        fieldk3c2 = True
-                elif k4d <= angle <= k5d:
-                    if 0 <= total_distance <= c0:
-
-                      #  print("Danger in: " + "fieldk4c0")
-
-                        fieldk4c0 = True
-                    elif c0 <= total_distance <= c1:
-
-                     #   print("Danger in: " + "fieldk4c1")
-
-                        fieldk4c1 = True
-                    # elif c1 <= total_distance <= c2:
-                    #
-                    #     print("Danger in: " + "fieldk4c2")
-                    #
-                    #     fieldk4c2 = True
-
-        fields = [fieldk0c0, fieldk1c0, fieldk2c0, fieldk3c0, fieldk4c0, fieldk0c1, fieldk1c1, fieldk2c1, fieldk3c1,
-                  fieldk4c1, fieldk1c2, fieldk2c2, fieldk3c2]
-        # for field in fields:
-        #     if field:
-        #         print("Angle: " + str(angle))
-        #         print("Distance: " + str(total_distance))
+                for i, (angle_min, angle_max) in enumerate(angle_ranges):
+                    if angle_min <= angle <= angle_max:
+                        for j, dist_max in enumerate(distance_ranges):
+                            if j == 2 and i != 1 and i != 2 and i != 3:
+                                continue
+                            if total_distance <= dist_max:
+                                self.fields[i + j * 5] = True
+                                break
 
         self.draw_danger_area()
-        return fields
-        # player_x, player_y = player.rect.center
-        #
-        # left_limit = player.rect.left - 21
-        # right_limit = player.rect.right + 21
-        # danger = False
-        # for bullet in bullets:
-        #     if not bullet.player_bullet:  # Check if the bullet is an enemy bullet
-        #         bullet_x, bullet_y = bullet.rect.center
-        #         distance = player_y - bullet_y
-        #         if left_limit <= bullet_x <= right_limit and bullet_y <= player_y:
-        #             if distance <= distance_threshold:
-        #                 danger = True
-        # if danger:
-        #     self.draw_danger_area()
-        # return danger
-
-        # left = False
-        # right = False
-        #
-        # for bullet in bullets:
-        #     if not bullet.player_bullet:  # Check if the bullet is an enemy bullet
-        #         bullet_x, bullet_y = bullet.rect.center
-        #         distance = sqrt((bullet_x - player_x) ** 2 + (bullet_y - player_y) ** 2)
-        #
-        #         if distance <= distance_threshold and bullet_y > player_y + 15:
-        #             if bullet_x < player_x:
-        #                 left = True
-        #             elif bullet_x > player_x:
-        #                 right = True
-        #
-        # return left, right
+        return self.fields
 
     def get_state(self):
         player_x = self.player.rect.x
@@ -223,7 +91,7 @@ class Game:
 
         # add army pos
         state.append(self.enemies_matrix[0][0].rect.x - player_x)
-        #state.append(self.enemies_matrix[0][0].rect.y - player_y)
+        state.append(self.enemies_matrix[0][0].rect.y - player_y)
         state.append(0)
 
         alive_in_column = [False] * self.cols
@@ -242,7 +110,8 @@ class Game:
             state.append(field)
 
         # For old showcase:
-        # state.append(False)
+        #state.append(False)
+        #state.append(False)
         return state
 
     def reset(self):
