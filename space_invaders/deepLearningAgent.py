@@ -3,9 +3,6 @@ import time
 from keras.models import Sequential
 from keras.models import load_model
 from keras.layers import Convolution2D, Flatten, Dense
-from rl.policy import LinearAnnealedPolicy, EpsGreedyQPolicy
-from rl.memory import SequentialMemory
-from rl.agents import DQNAgent
 
 from keras.optimizers import Adam
 import numpy as np
@@ -134,6 +131,7 @@ def train_dqn(episode):
         state = np.reshape(state, (1, state_space))
         score = 0
         itera = 0
+        print()
         while itera < max_steps:
             action = agent.act(state)
             next_state, reward, done = env.step(action)
@@ -141,7 +139,7 @@ def train_dqn(episode):
             # TODO change to not save every record
             if score > record:
                 record = score
-                print("save + record = ", score)
+                print("new record = ", score)
             next_state = np.reshape(next_state, (1, state_space))
             agent.remember(state, action, reward, next_state, done)
             state = next_state
@@ -150,10 +148,12 @@ def train_dqn(episode):
                 print("episode: {}/{}, score: {}".format(e, episode, score))
                 break
             itera += 1
+        if max_steps < itera:
+            print("Stopped because too many steps")
         if e != 0 and int(episode / 10) != 0:
             if e % (int(episode / 10)) == (int(episode / 10) - 1):
                 agent.model.save('first_model_attempt')
-                print("save + episode = ", e)
+                print("saved episode = ", e)
         # if episode <10:
         #     agent.model.save('model_defens_newmodel')
         #     print("save + episode = ", e)
