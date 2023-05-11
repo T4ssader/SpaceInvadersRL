@@ -152,7 +152,7 @@ def main():
     # agent.load_q_table("q_table_yes_y_pos.pkl")
     use_gui = False
     simulation_mode = False  # Hinzufügen der simulation_mode Variable
-
+    #game.run()
     if use_gui and not simulation_mode:
         gui = QLearningGUI(game, agent)
         agent.set_epsilon(gui.epsilon)

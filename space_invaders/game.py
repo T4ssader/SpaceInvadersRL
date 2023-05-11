@@ -142,6 +142,7 @@ class Game:
         while not self.game_over:
             self.update()
             self.draw()
+
             self.clock.tick(self.FPS)
 
     def handle_input(self, keys=None, action=None):
