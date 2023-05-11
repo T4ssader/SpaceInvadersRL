@@ -92,7 +92,7 @@ class Game:
         # add army pos
         state.append(self.enemies_matrix[0][0].rect.x - player_x)
         state.append(self.enemies_matrix[0][0].rect.y - player_y)
-        state.append(0)
+        #state.append(0)
 
         alive_in_column = [False] * self.cols
 
@@ -118,11 +118,13 @@ class Game:
         self.enemies_matrix = []
         self.enemies.empty()
         self.spawn_enemies(rows=self.rows, cols=self.cols)
-        # self.game_over = False
+        self.game_over = False
         self.bullets.empty()
         self.player.kill()
         self.player = Player(400, 500, self.player_image)
         self.score = 0
+
+        return self.get_state()
 
     def spawn_enemies(self, rows, cols):
         for row in range(rows):
@@ -203,6 +205,74 @@ class Game:
         #     if len(enemy_list) == 0:
         #         self.enemies_matrix.remove(enemy_list)
 
+
+    def step(self, action=None):
+        self.counter += 1
+        if self.ai:
+            self.handle_input(keys=None, action=action)
+        else:
+            keys = pygame.key.get_pressed()
+            self.handle_input(keys=keys, action=None)
+
+        old_score = self.score
+
+        for enemy in self.enemies:
+            if enemy.rect.x < 10 and self.enemy_speed_x < 0 or enemy.rect.x > 790 - enemy.rect.width and self.enemy_speed_x > 0:
+                self.enemy_speed_x = -self.enemy_speed_x
+                self.enemy_speed_y = 10
+                break
+            if enemy.rect.bottom > self.screen.get_height():
+                self.player.lives -= 1
+                self.score -= 500
+                if self.score < -1500:
+                    self.score = -1500
+                self.remove_enemy(enemy)
+        if self.player.lives <= 0:
+            self.game_over = True
+        if self.counter % 30 == 0:
+            self.enemies.update(self.enemy_speed_x, self.enemy_speed_y)
+            self.enemy_speed_y = 0
+
+        if self.enemies_attack:
+            self.enemy_fire()
+
+        self.bullets.update()
+
+        for bullet in self.bullets:
+            # Player bullet collision
+            if bullet.player_bullet:
+                enemy_hit = pygame.sprite.spritecollideany(bullet, self.enemies)
+                if enemy_hit:
+                    self.remove_enemy(enemy_hit)
+
+                    bullet.kill()
+                    self.score += 100
+            # Enemy bullet collision
+            else:
+                if pygame.sprite.collide_rect(bullet, self.player):
+                    bullet.kill()
+                    self.score -= 500
+                    self.player.decrease_lives()
+                    if self.player.lives <= 0:
+                        self.player.kill()
+                        self.game_over = True
+
+        if pygame.sprite.spritecollideany(self.player, self.enemies) or not self.any_enemies_alive():
+            self.score -= 1500
+            if self.score < -1500:
+                self.score = -1500
+            self.game_over = True
+        if self.game_over and self.ai == False:
+            self.reset()
+
+        state = np.array(self.get_state())
+        flat_state = state.flatten()
+        done = self.game_over
+
+        return state, self.score - old_score, done
+
+
+
     def update(self, action=None):
         self.counter += 1
         if self.ai:
@@ -274,6 +344,28 @@ class Game:
                                         self.bullet_image, 5, player_bullet=False)
                         self.bullets.add(bullet)
                         break
+
+
+    def render(self, agent=None):
+
+        self.screen.fill(self.bg_color)
+        # Draw the score
+        score_text = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
+        self.screen.blit(score_text, (10, 0))
+
+        lives_text = self.lives_font.render(f"Lives: {self.player.lives}", True, (255, 255, 255))
+        self.screen.blit(lives_text, (10, 40))
+
+        self.screen.blit(self.player.image, self.player.rect)
+        self.enemies.draw(self.screen)
+        self.bullets.draw(self.screen)
+        if agent is not None:
+            best_action = agent.choose_action(self.get_state(), self)
+            self.draw_best_action_arrow(best_action)
+
+        # self.draw_danger_area()
+
+        pygame.display.flip()
 
     def draw(self, agent=None):
 

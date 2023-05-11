@@ -151,7 +151,7 @@ def main():
 
     # agent.load_q_table("q_table_yes_y_pos.pkl")
     use_gui = False
-    simulation_mode = True  # Hinzufügen der simulation_mode Variable
+    simulation_mode = False  # Hinzufügen der simulation_mode Variable
 
     if use_gui and not simulation_mode:
         gui = QLearningGUI(game, agent)
@@ -193,8 +193,9 @@ def main():
                     # Zeichnen und GUI-Aktualisierung nur, wenn simulation_mode deaktiviert ist
 
                     if not simulation_mode or (gui is not None and gui.game_draw_enabled):
+                        print("Drawing..")
                         game.draw(agent=agent)
-                        time.sleep(0.01)
+                        time.sleep(0.1)
                         if use_gui:
                             # gui.update()
                             gui.root.update()
@@ -218,6 +219,7 @@ def main():
 
         agent.set_epsilon(agent.epsilon * 0.99999)
         agent.set_alpha(agent.alpha * 0.99999)
+        #print(agent.q_table)
         if i % 3000 == 0 and i != 0:
             print("Updating q_table \nIn episode: " + str(i))
 
