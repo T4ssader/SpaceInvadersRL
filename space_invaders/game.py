@@ -12,7 +12,7 @@ import random
 
 class Game:
     def __init__(self, screen, rows=3, cols=6, game_speed=1, enemies_attack=True, enemy_attackspeed=0.01, ai=False,
-                 danger_threshold=150):
+                 danger_threshold=175):
         self.screen = screen
         self.rows = rows
         self.cols = cols
@@ -138,12 +138,12 @@ class Game:
                 self.enemies.add(enemy)
             self.enemies_matrix.append(enemy_row)
 
-    def run(self):
-        while not self.game_over:
-            self.update()
-            self.draw()
-
-            self.clock.tick(self.FPS)
+    # def run(self):
+    #     while not self.game_over:
+    #         self.update()
+    #         self.draw()
+    #
+    #         self.clock.tick(self.FPS)
 
     def handle_input(self, keys=None, action=None):
         # actions

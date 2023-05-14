@@ -1,9 +1,10 @@
+import os.path
 import time
 
 from keras.models import Sequential
 from keras.models import load_model
 from keras.layers import Convolution2D, Flatten, Dense
-
+import tensorflow as tf
 from keras.optimizers import Adam
 import numpy as np
 from collections import deque
@@ -18,7 +19,7 @@ pygame.init()
 
 screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Space Invaders")
-env = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
+env = Game(screen, rows=3, cols=6, game_speed=0.001, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
 
 
 class DQN:
@@ -28,7 +29,7 @@ class DQN:
         self.state_space = state_space
         self.epsilon = 0.9
         self.gamma = .97
-        self.batch_size = 64
+        self.batch_size = 100000
         self.epsilon_min = .005
         self.epsilon_decay = .999
         self.learning_rate = 0.01
@@ -61,7 +62,7 @@ class DQN:
 
     def replay(self):
         if len(self.memory) < self.batch_size:
-            print("\n\n\nmemory overrun\nFinishing...")
+            #print("\n\n\nmemory overrun\nFinishing...")
             return
 
         minibatch = random.sample(self.memory, self.batch_size)
@@ -102,30 +103,38 @@ class DQN:
             state = np.reshape(state, (1, state_space))
             done = False
             while not done:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        done = True
+                # for event in pygame.event.get():
+                #     if event.type == pygame.QUIT:
+                #         done = True
 
                 next_action = self.act(state)
                 next_state, reward, done = env.step(next_action)
                 next_state = np.reshape(next_state, (1, state_space))
                 state = next_state
-                time.sleep(0.005)
+                #time.sleep(0.0005)
                 env.draw()
 
 
-def train_dqn(episode):
+def train_dqn(episode, model_name):
+    if os.path.isdir(model_name):
+        a = input(f"You are about to overrite \"{model_name}\", are you sure about that?\n")
+        if a.lower() not in ["yes","y","ja","j"]:
+            print("Canceled")
+            exit()
+        else:
+            print("\nSuccessfull, continuing")
 
     loss = []
     nb_score = []
 
     action_space = 5
     state_space = 21
-    max_steps = 9001
+    max_steps = 900100
     record = 0
     score = 0
 
     agent = DQN(action_space, state_space)
+    agent.model.save("EMPTY_MODEL")
     for e in range(episode):
         state = env.reset()
         state = np.reshape(state, (1, state_space))
@@ -150,13 +159,9 @@ def train_dqn(episode):
             itera += 1
         if max_steps < itera:
             print("Stopped because too many steps")
-        if e != 0 and int(episode / 10) != 0:
-            if e % (int(episode / 10)) == (int(episode / 10) - 1):
-                agent.model.save('first_model_attempt')
-                print("saved episode = ", e)
-        # if episode <10:
-        #     agent.model.save('model_defens_newmodel')
-        #     print("save + episode = ", e)
+        if e != 0 and (e % 100) == 0:
+            agent.model.save(model_name)
+            print("saved episode = ", e)
 
         loss.append(score)
 
@@ -164,16 +169,20 @@ def train_dqn(episode):
         # if e > episode :
         # sys.exit()
 
-    agent.model.save('first_model_attempt')
+    agent.model.save(model_name)
 
     return loss, agent
 
 
 if __name__ == '__main__':
     train = True
+    model_name = "model_1000e"
+
     if train:
-        ep = 10
-        loss, model = train_dqn(ep)
+        ep = 100
+        print(tf.config.list_physical_devices('GPU'))
+        loss, model = train_dqn(ep, model_name)
+
 
         with open("model_file.pkl", "wb") as binary_file:
             pickle.dump(model, binary_file, pickle.HIGHEST_PROTOCOL)
@@ -182,6 +191,7 @@ if __name__ == '__main__':
         plt.ylabel('reward')
         plt.legend()
         plt.show()
+
     else:
         agent = DQN(5, 21)
-        agent.play_with_model("model_defens_newmodel")
+        agent.play_with_model(model_name)
