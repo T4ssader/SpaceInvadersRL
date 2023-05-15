@@ -12,14 +12,14 @@ import random
 import matplotlib.pyplot as plt
 import pickle
 
-from space_invaders.game import Game
+from CartPole import CartPole
 import pygame
 
 pygame.init()
 
 screen = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Space Invaders")
-env = Game(screen, rows=3, cols=6, game_speed=0.001, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
+pygame.display.set_caption("Cart Pole")
+env = CartPole(screen)
 
 
 class DQN:
@@ -29,9 +29,9 @@ class DQN:
         self.state_space = state_space
         self.epsilon = 0.9
         self.gamma = .97
-        self.batch_size = 100000
+        self.batch_size = 50000
         self.epsilon_min = .005
-        self.epsilon_decay = .999
+        self.epsilon_decay = .9
         self.learning_rate = 0.01
         self.memory = deque(maxlen=50000)
 
@@ -39,8 +39,8 @@ class DQN:
 
     def build_model(self):
         model = Sequential()
-        model.add(Dense(128, input_shape=(self.state_space,), activation='relu'))
-        model.add(Dense(64, activation='relu'))
+        model.add(Dense(32, input_shape=(self.state_space,), activation='relu'))
+        model.add(Dense(16, activation='relu'))
         model.add(Dense(self.action_space, activation='linear'))
         model.compile(loss='mse', optimizer=Adam(learning_rate=self.learning_rate))
         return model
@@ -59,10 +59,9 @@ class DQN:
         best_actions = best_actions.flatten().tolist()
         return random.choice(best_actions)
 
-
     def replay(self):
         if len(self.memory) < self.batch_size:
-            #print("\n\n\nmemory overrun\nFinishing...")
+            # print("\n\n\nmemory overrun\nFinishing...")
             return
 
         minibatch = random.sample(self.memory, self.batch_size)
@@ -77,7 +76,7 @@ class DQN:
         next_states = np.squeeze(next_states)
 
         targets = rewards + self.gamma * (np.amax(self.model.predict_on_batch(next_states), axis=1)) * (1 - dones)
-        targets_full = self.model.predict_on_batch(states) ##
+        targets_full = self.model.predict_on_batch(states)
 
         ind = np.array([i for i in range(self.batch_size)])
         targets_full[[ind], [actions]] = targets
@@ -89,36 +88,35 @@ class DQN:
 
     def play_with_model(self, model_path):
         self.model = load_model(model_path)
+
         self.learning_rate = 0
         self.epsilon = 0
         self.epsilon_decay = 0
 
-        state_space = 21
+        state_space = 4
         done = False
 
-
-
-        for _ in range(10):
+        for _ in range(100):
             state = env.reset()
             state = np.reshape(state, (1, state_space))
             done = False
             while not done:
-                # for event in pygame.event.get():
-                #     if event.type == pygame.QUIT:
-                #         done = True
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        break
 
                 next_action = self.act(state)
                 next_state, reward, done = env.step(next_action)
                 next_state = np.reshape(next_state, (1, state_space))
                 state = next_state
-                #time.sleep(0.0005)
-                env.draw()
+                time.sleep(0.001)
+                env.render()
 
 
 def train_dqn(episode, model_name):
     if os.path.isdir(model_name):
         a = input(f"You are about to overrite \"{model_name}\", are you sure about that?\n")
-        if a.lower() not in ["yes","y","ja","j"]:
+        if a.lower() not in ["yes", "y", "ja", "j"]:
             print("Canceled")
             exit()
         else:
@@ -127,14 +125,14 @@ def train_dqn(episode, model_name):
     loss = []
     nb_score = []
 
-    action_space = 5
-    state_space = 21
+    action_space = 2
+    state_space = 4
     max_steps = 900100
     record = 0
     score = 0
 
     agent = DQN(action_space, state_space)
-    agent.model.save("EMPTY_MODEL")
+    # agent.model.save("EMPTY_MODEL")
     for e in range(1, episode):
         state = env.reset()
         state = np.reshape(state, (1, state_space))
@@ -159,7 +157,7 @@ def train_dqn(episode, model_name):
             itera += 1
         if max_steps < itera:
             print("Stopped because too many steps")
-        if e != 0 and (e % 100) == 0:
+        if e != 0 and (e % 250) == 0:
             agent.model.save(str(e) + "_" + model_name)
             print("saved episode = ", e)
 
@@ -176,13 +174,12 @@ def train_dqn(episode, model_name):
 
 if __name__ == '__main__':
     train = False
-    model_name = "EMPTY_MODEL"
+    model_name = "750_CartPole1"
 
     if train:
-        ep = 10000
+        ep = 1000
         print(tf.config.list_physical_devices('GPU'))
         loss, model = train_dqn(ep, model_name)
-
 
         with open("model_file.pkl", "wb") as binary_file:
             pickle.dump(model, binary_file, pickle.HIGHEST_PROTOCOL)
@@ -193,5 +190,5 @@ if __name__ == '__main__':
         plt.show()
 
     else:
-        agent = DQN(5, 21)
+        agent = DQN(2, 4)
         agent.play_with_model(model_name)

@@ -1,4 +1,6 @@
 import pygame
+
+from CartPole import CartPole
 from space_invaders.game import Game
 
 
@@ -19,6 +21,28 @@ def main():
 
     game.run()
 
+def playCartPole():
+    pygame.init()
+    width, height = 800, 600
+    screen = pygame.display.set_mode((width, height))
+    cartpole = CartPole(screen)
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    cartpole.step(action=-1)
+                elif event.key == pygame.K_RIGHT:
+                    cartpole.step(action=1)
+        screen.fill((0, 0, 0))
+        cartpole.render()
+        pygame.display.flip()
+    pygame.quit()
+
+
 
 
 
@@ -26,8 +50,9 @@ def main():
 if __name__ == "__main__":
 
     x = 0.9
-    for i in range(160000):
-        x= x * 0.99999
+    for i in range(100):
+        x= x * 0.99
     print(x)
 
-    main()
+    #playCartPole()
+    #main()
