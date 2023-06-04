@@ -1,3 +1,5 @@
+import time
+
 import pygame
 import math
 import numpy as np
@@ -34,7 +36,7 @@ class CartPole:
         force = self.force_mag if action == 1 else -self.force_mag
         temp = (force + self.polemass_length * self.pole_angle * self.pole_angular_velocity ** 2) / self.total_mass
         angular_acc = (self.gravity * math.sin(self.pole_angle) - math.cos(self.pole_angle) * temp) / (
-                    self.length * (4.0 / 3.0 - self.mass_pole * math.cos(self.pole_angle) ** 2 / self.total_mass))
+                self.length * (4.0 / 3.0 - self.mass_pole * math.cos(self.pole_angle) ** 2 / self.total_mass))
         acc = temp - self.polemass_length * angular_acc / self.total_mass
 
         self.cart_position += self.tau * self.cart_velocity
@@ -46,11 +48,7 @@ class CartPole:
             self.game_over = True
             reward = -100
         else:
-            if -0.15 < self.pole_angle < 0.15:
-                reward = 10
-            else:
-                reward = 1
-                # self.score += 1
+            reward = 1.0 - abs(self.pole_angle)  # Reward closer to 1 when pole angle is closer to zero
 
         return self.get_state(), reward, self.game_over
 
@@ -81,7 +79,8 @@ class CartPole:
         pole_screen_y = cart_y - int(pole_y * scale)  # subtract from cart_y to flip the y-coordinate
 
         # Draw the cart and the pole
-        pygame.draw.line(self.screen, (255, 255, 255), (cart_x, cart_y), (pole_screen_x, pole_screen_y), 5)
+        pygame.draw.line(self.screen, (255, 255, 255), (int(cart_x), int(cart_y)), (int(pole_screen_x), int(pole_screen_y)), 5)
+
         pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(cart_x - 25, cart_y - 10, 50, 20))
 
         # Update the display
