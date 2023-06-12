@@ -1,5 +1,6 @@
 import math
 
+import cv2
 import pygame
 from math import sqrt
 from pygame.locals import *
@@ -282,7 +283,7 @@ class Game:
 
         move_down_penalty = -100 if enemy_moved_down else 0
 
-        return new_state, (self.score - old_score) + survival_reward + dodge_reward + move_down_penalty, done
+        return (self.score - old_score) + survival_reward + dodge_reward + move_down_penalty, done
 
     def calculate_dodge_reward(self, old_state, new_state, action):
         dodge_reward = 0
@@ -375,7 +376,6 @@ class Game:
                         self.bullets.add(bullet)
                         break
 
-
     def render(self, agent=None):
 
         self.screen.fill(self.bg_color)
@@ -396,6 +396,8 @@ class Game:
         # self.draw_danger_area()
 
         pygame.display.flip()
+
+        return pygame.surfarray.array3d(pygame.display.get_surface())
 
     def draw(self, agent=None):
 
