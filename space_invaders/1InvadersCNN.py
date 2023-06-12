@@ -1,4 +1,5 @@
 import gc
+import os
 
 import cv2
 import numpy as np
@@ -101,23 +102,22 @@ class CNNSpaceInvaders:
         self.model = OurModel(input_shape=self.state_size, action_space=self.action_size, dueling=self.dueling)
         self.target_model = OurModel(input_shape=self.state_size, action_space=self.action_size, dueling=self.dueling)
 
-    def GetImage(self, e):
+    def GetImage(self, e=None):
         img = self.env.render()
 
         img_rgb = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-        img_rgb_resized = cv2.resize(img_rgb, (self.COLS, self.ROWS), interpolation=cv2.INTER_CUBIC)
-        # img_rgb_resized[img_rgb_resized < 255] = 0
-        img_rgb_resized = img_rgb_resized / 255
+        img_rgb_resized = cv2.resize(img_rgb, (self.COLS, self.ROWS), interpolation=cv2.INTER_NEAREST)
+
+        # Standardization
+        mean, std = np.mean(img_rgb_resized), np.std(img_rgb_resized)
+        img_normalized = (img_rgb_resized - mean) / std if std != 0 else img_rgb_resized - mean
 
         self.image_memory = np.roll(self.image_memory, 1, axis=0)
-        self.image_memory[0, :, :] = img_rgb_resized
+        self.image_memory[0, :, :] = img_normalized
 
-        # self.imshow(self.image_memory,0)
-
-        if e % 1000 and e is not 0:
-            # save the image
-            plt.imsave("image1000.png", self.image_memory[0, :, :], cmap="gray")
-
+        #if e is not None and e % 1000 and e is not 0:
+        #    # save the image
+        #    plt.imsave(f"test_images/image_{e}.png", self.image_memory[0, :, :], cmap="gray")
 
         return np.expand_dims(self.image_memory, axis=0)
 
@@ -301,7 +301,23 @@ class CNNSpaceInvaders:
                     self.replay()
 
     def test(self):
-        self.reset()
+        # Create directory to save images
+        if not os.path.exists('test_images'):
+            os.makedirs('test_images')
+
+        state = self.reset()
+        done = False
+        i = 0
+        while not done:
+            i += 1
+            action, _ = self.act(state)
+            next_state, reward, done = self.step(action, i)
+
+            state = next_state
+            if done:
+                break
+
+        self.GetImage(i)
 
     def play_model(self):
         # in this method we want to let the agent play with an epsilon of 0 so we see how good he is
@@ -312,6 +328,6 @@ class CNNSpaceInvaders:
 
 if __name__ == '__main__':
     agent = CNNSpaceInvaders()
-    agent.run()
-    # agent.test()
-    # agent.play_model()
+    #agent.run()
+    agent.test()
+    #agent.play_model()
