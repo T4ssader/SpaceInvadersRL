@@ -320,14 +320,30 @@ class CNNSpaceInvaders:
         self.GetImage(i)
 
     def play_model(self):
-        # in this method we want to let the agent play with an epsilon of 0 so we see how good he is
-        self.epsilon = 0
+        # Load the weights of the model from a given file
+        self.model.load_weights(self.Model_name)
 
+        # Set the epsilon value to 0, so the agent will not explore but exploit the Q-values it has learnt
+        self.epsilon = 0.0
 
+        for e in range(500):
+            state = self.reset()
+            done = False
+            i = 0
+            while not done:
+                i += 1
+                action, _ = self.act(state)
+                next_state, reward, done = self.step(action, i)
+
+                state = next_state
+                if done:
+                    break
+
+            print(f"Episode: {e + 1}/{500}, Steps taken: {i}")
 
 
 if __name__ == '__main__':
     agent = CNNSpaceInvaders()
     #agent.run()
-    agent.test()
-    #agent.play_model()
+    #agent.test()
+    agent.play_model()
