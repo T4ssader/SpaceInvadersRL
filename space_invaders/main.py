@@ -14,7 +14,7 @@ def main():
     pygame.display.set_caption("Space Invaders")
 
     # Create a space_invaders instance
-    game = Game(screen=screen)
+    game = Game(screen=screen, game_speed=1.3 ,enemy_attackspeed=.01)
 
     # Uncomment the following line to train the reinforcement learning agent
     # train_agent(game)
@@ -50,9 +50,9 @@ def playCartPole():
 if __name__ == "__main__":
 
     x = 0.9
-    for i in range(100):
-        x= x * 0.99
+    for i in range(10000):
+        x= x * 0.9999
     print(x)
 
     #playCartPole()
-    #main()
+    main()

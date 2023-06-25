@@ -11,7 +11,7 @@ import random
 
 
 class Game:
-    def __init__(self, screen, rows=3, cols=6, game_speed=1, enemies_attack=True, enemy_attackspeed=0.01, ai=False,
+    def __init__(self, screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=False,
                  danger_threshold=175):
         self.screen = screen
         self.rows = rows
@@ -81,7 +81,7 @@ class Game:
                                 self.fields[i + j * 5] = True
                                 break
 
-        self.draw_danger_area()
+        #self.draw_danger_area()
         return self.fields
 
     def get_state(self):
@@ -123,6 +123,7 @@ class Game:
         self.player.kill()
         self.player = Player(400, 500, self.player_image)
         self.score = 0
+        self.counter = 0
 
         return self.get_state()
 
@@ -138,28 +139,41 @@ class Game:
                 self.enemies.add(enemy)
             self.enemies_matrix.append(enemy_row)
 
-    # def run(self):
-    #     while not self.game_over:
-    #         self.update()
-    #         self.draw()
-    #
-    #         self.clock.tick(self.FPS)
+    def run(self):
+        while not self.game_over:
+            self.update()
+            self.draw()
+
+            self.clock.tick(self.FPS)
 
     def handle_input(self, keys=None, action=None):
-        # actions
-        # 0 = shoot
-        # 1 = left
-        # 2 = right
-        # 3 = leftShoot
-        # 4 = rightShoot
+            # actions
+            # 0 = noAction
+            # 1 = shoot
+            # 2 = left
+            # 3 = right
         if self.ai is True:
             if action == 0:
+                return
+            elif action == 1:
                 self.shoot()
-            elif action == 1 or action == 2:
+            elif action == 2 or action == 3:
                 self.player.update(action)
-            else:
-                self.player.update(action)
-                self.shoot()
+
+                # actions
+                # 0 = shoot
+                # 1 = left
+                # 2 = right
+                # 3 = leftShoot
+                # 4 = rightShoot
+        # if self.ai is True:
+        #     if action == 0:
+        #             self.shoot()
+        #     elif action == 1 or action == 2:
+        #             self.player.update(action)
+        #     else:
+        #             self.player.update(action)
+        #             self.shoot()
         else:
             if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
                 self.player.update(keys=keys)
@@ -247,12 +261,12 @@ class Game:
                     self.remove_enemy(enemy_hit)
 
                     bullet.kill()
-                    self.score += 100
+                    self.score += 200
             # Enemy bullet collision
             else:
                 if pygame.sprite.collide_rect(bullet, self.player):
                     bullet.kill()
-                    self.score -= 500
+                    self.score -= 300
                     self.player.decrease_lives()
                     if self.player.lives <= 0:
                         self.player.kill()
@@ -314,12 +328,12 @@ class Game:
                     self.remove_enemy(enemy_hit)
 
                     bullet.kill()
-                    self.score += 100
+                    self.score += 200
             # Enemy bullet collision
             else:
                 if pygame.sprite.collide_rect(bullet, self.player):
                     bullet.kill()
-                    self.score -= 500
+                    self.score -= 300
                     self.player.decrease_lives()
                     if self.player.lives <= 0:
                         self.player.kill()
@@ -332,7 +346,8 @@ class Game:
             self.game_over = True
         if self.game_over and self.ai == False:
             self.reset()
-
+        # if self.counter % 10 == 0:
+        #     self.score -= 1
         return tuple(self.get_state()), self.score - old_score
 
     def enemy_fire(self):
@@ -381,11 +396,11 @@ class Game:
         self.screen.blit(self.player.image, self.player.rect)
         self.enemies.draw(self.screen)
         self.bullets.draw(self.screen)
-        if agent is not None:
-            best_action = agent.choose_action(self.get_state(), self)
-            self.draw_best_action_arrow(best_action)
+        # if agent is not None:
+        #     best_action = agent.choose_action(self.get_state(), self)
+        #     self.draw_best_action_arrow(best_action)
 
-        # self.draw_danger_area()
+        #self.draw_danger_area()
 
         pygame.display.flip()
 
