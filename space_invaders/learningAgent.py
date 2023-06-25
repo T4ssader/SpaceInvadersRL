@@ -288,6 +288,9 @@ def main2():
                     agent.update(reward, state, action)
 
                     if not simulation_mode:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                game.game_over = True
                         game.draw(agent=agent)
                         time.sleep(0.01)
 
