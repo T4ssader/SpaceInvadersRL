@@ -295,10 +295,9 @@ def main2():
                     action = next_action
                     if game.game_over:
                         if not simulation_mode:
-                            print(f"Der Agent hat einen Score von: {score} erreicht!")
+                            print(f"Der Agent hat einen Score von: {score} erreicht!\n\n")
                         scores.append(score)
-                        if not simulation_mode:
-                            print(f"Episode {i}: score={score}")
+
 
         agent.set_epsilon(agent.epsilon * 0.99999)
 
