@@ -262,9 +262,9 @@ def main2():
     pygame.display.set_caption("Space Invaders")
 
     game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
-    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=1, gamma=.9, alpha=0.0001)
+    agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0, gamma=.9, alpha=0.0000)
 
-    #agent.load_q_table("q_table_new_actions_time.pkl")
+    agent.load_q_table("q_table_Final.pkl")
 
     simulation_mode = False
 
@@ -295,11 +295,11 @@ def main2():
                     action = next_action
                     if game.game_over:
                         if not simulation_mode:
-                            print(f"Der Agent hat einen Score von: {score} erreicht!\n\n")
+                            print(f"\n\nDer Agent hat einen Score von: {score} erreicht!")
                         scores.append(score)
 
 
-        agent.set_epsilon(agent.epsilon * 0.99999)
+        #agent.set_epsilon(agent.epsilon * 0.99999)
 
         if i % 3000 == 0 and i != 0:
             print("Updating q_table \nIn episode: " + str(i))
