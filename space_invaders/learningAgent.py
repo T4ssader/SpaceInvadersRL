@@ -292,7 +292,7 @@ def main2():
                             if event.type == pygame.QUIT:
                                 game.game_over = True
                         game.draw(agent=agent)
-                        time.sleep(0.01)
+                        time.sleep(0.005)
 
                     state = next_state
                     action = next_action

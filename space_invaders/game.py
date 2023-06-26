@@ -146,6 +146,7 @@ class Game:
 
             self.clock.tick(self.FPS)
 
+
     def handle_input(self, keys=None, action=None):
             # actions
             # 0 = noAction
@@ -345,6 +346,7 @@ class Game:
                 self.score = -1500
             self.game_over = True
         if self.game_over and self.ai == False:
+            print(f"\n\nEs wurde ein Score von {self.score} erreicht!")
             self.reset()
         # if self.counter % 10 == 0:
         #     self.score -= 1
