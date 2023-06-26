@@ -60,46 +60,19 @@ class QLearningAgent:
         self.prev_action = action
 
     # old:
-    # def choose_action(self, state, game):
-    #     does_player_bullet_exist = game.is_allowed_to_shoot()
-    #
-    #     if random.random() < self.epsilon:  # Wähle mit einer Wahrscheinlichkeit von Epsilon eine zufällige Aktion
-    #         if does_player_bullet_exist:
-    #             action = random.choice([1, 2])
-    #         else:
-    #             action = random.choice(self.actions)
-    #     else:  # Wähle sonst die Aktion mit dem höchsten Q-Wert
-    #         if does_player_bullet_exist:
-    #             available_actions = [1, 2]
-    #         else:
-    #             available_actions = self.actions
-    #
-    #         q_values = [self.get_q_value(state, a) for a in available_actions]
-    #         max_q_value = max(q_values)
-    #         count_max = q_values.count(max_q_value)
-    #         if count_max > 1:  # Bei mehreren maximalen Q-Werten, wähle zufällig einen
-    #             best_indices = [i for i in range(len(available_actions)) if q_values[i] == max_q_value]
-    #             i = random.choice(best_indices)
-    #         else:
-    #             i = q_values.index(max_q_value)
-    #
-    #         action = available_actions[i]
-    #
-    #     return action
-
     def choose_action(self, state, game):
         does_player_bullet_exist = game.is_allowed_to_shoot()
 
         if random.random() < self.epsilon:  # Wähle mit einer Wahrscheinlichkeit von Epsilon eine zufällige Aktion
             if does_player_bullet_exist:
-                action = random.choice([0, 2, 3])
+                action = random.choice([1, 2])
             else:
-                action = 1#random.choice(self.actions)
+                action = random.choice(self.actions)
         else:  # Wähle sonst die Aktion mit dem höchsten Q-Wert
             if does_player_bullet_exist:
-                available_actions = [0, 2, 3]
+                available_actions = [1, 2]
             else:
-                available_actions = [1]#self.actions
+                available_actions = self.actions
 
             q_values = [self.get_q_value(state, a) for a in available_actions]
             max_q_value = max(q_values)
@@ -113,6 +86,33 @@ class QLearningAgent:
             action = available_actions[i]
 
         return action
+
+    # def choose_action(self, state, game):
+    #     does_player_bullet_exist = game.is_allowed_to_shoot()
+    #
+    #     if random.random() < self.epsilon:  # Wähle mit einer Wahrscheinlichkeit von Epsilon eine zufällige Aktion
+    #         if does_player_bullet_exist:
+    #             action = random.choice([0, 2, 3])
+    #         else:
+    #             action = 1#random.choice(self.actions)
+    #     else:  # Wähle sonst die Aktion mit dem höchsten Q-Wert
+    #         if does_player_bullet_exist:
+    #             available_actions = [0, 2, 3]
+    #         else:
+    #             available_actions = [1]#self.actions
+    #
+    #         q_values = [self.get_q_value(state, a) for a in available_actions]
+    #         max_q_value = max(q_values)
+    #         count_max = q_values.count(max_q_value)
+    #         if count_max > 1:  # Bei mehreren maximalen Q-Werten, wähle zufällig einen
+    #             best_indices = [i for i in range(len(available_actions)) if q_values[i] == max_q_value]
+    #             i = random.choice(best_indices)
+    #         else:
+    #             i = q_values.index(max_q_value)
+    #
+    #         action = available_actions[i]
+    #
+    #     return action
 
     # Funktion zum Zurücksetzen des Agenten
     def reset(self):
@@ -264,8 +264,8 @@ def main2():
     game = Game(screen, rows=3, cols=6, game_speed=0.5, enemies_attack=True, enemy_attackspeed=0.01, ai=True)
     agent = QLearningAgent(actions=[0, 1, 2, 3, 4], epsilon=0, gamma=.9, alpha=0.0000)
 
-    agent.load_q_table("q_table_Final.pkl")
-
+    #agent.load_q_table("collisionBug.pkl")
+    agent.load_q_table("disappearBug.pkl")
     simulation_mode = False
 
     scores = deque(maxlen=3000)
@@ -292,7 +292,7 @@ def main2():
                             if event.type == pygame.QUIT:
                                 game.game_over = True
                         game.draw(agent=agent)
-                        time.sleep(0.005)
+                        time.sleep(0.002)
 
                     state = next_state
                     action = next_action

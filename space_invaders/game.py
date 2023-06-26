@@ -105,13 +105,13 @@ class Game:
         for alive in alive_in_column:
             state.append(alive)
 
-        fields = self.enemy_bullet_positions(self.player, self.bullets, self.danger_threshold)
-        for field in fields:
-            state.append(field)
+        # fields = self.enemy_bullet_positions(self.player, self.bullets, self.danger_threshold)
+        # for field in fields:
+        #     state.append(field)
 
         # For old showcase:
-        #state.append(False)
-        #state.append(False)
+        state.append(False)
+        state.append(False)
         return state
 
     def reset(self):
@@ -153,13 +153,13 @@ class Game:
             # 1 = shoot
             # 2 = left
             # 3 = right
-        if self.ai is True:
-            if action == 0:
-                return
-            elif action == 1:
-                self.shoot()
-            elif action == 2 or action == 3:
-                self.player.update(action)
+        # if self.ai is True:
+        #     if action == 0:
+        #         return
+        #     elif action == 1:
+        #         self.shoot()
+        #     elif action == 2 or action == 3:
+        #         self.player.update(action)
 
                 # actions
                 # 0 = shoot
@@ -167,14 +167,14 @@ class Game:
                 # 2 = right
                 # 3 = leftShoot
                 # 4 = rightShoot
-        # if self.ai is True:
-        #     if action == 0:
-        #             self.shoot()
-        #     elif action == 1 or action == 2:
-        #             self.player.update(action)
-        #     else:
-        #             self.player.update(action)
-        #             self.shoot()
+        if self.ai is True:
+            if action == 0:
+                    self.shoot()
+            elif action == 1 or action == 2:
+                    self.player.update(action)
+            else:
+                    self.player.update(action)
+                    self.shoot()
         else:
             if keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]:
                 self.player.update(keys=keys)
